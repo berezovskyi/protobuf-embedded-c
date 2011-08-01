@@ -43,13 +43,16 @@ import org.antlr.stringtemplate.language.DefaultTemplateLexer;
  */
 public class Protoc {
 
+	public static final String VERSION = "0.1 (2011-AUG-01)";
+
 	private static boolean debug = false;
 
 	public static void main(String[] args) throws Exception {
 		// Display help screen.
 		if (args.length == 0 || args[0].compareToIgnoreCase("-h") == 0) {
 			System.out
-					.println("Protoc embedded c compiler for protocol buffers");
+					.println("Protoc Embedded C Compiler for Protocol Buffers");
+			System.out.println("Version " + VERSION);
 			System.out
 					.println("Copyright (c) 2009-2011, Technische Universitaet Muenchen, http://www4.in.tum.de/");
 			System.out
