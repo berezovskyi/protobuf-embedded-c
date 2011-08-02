@@ -1,0 +1,44 @@
+package edu.tum.cs.ccts.protobuf.embedded;
+
+option java_package="edu.tum.cs.ccts.protobuf.embedded";
+option java_outer_classname="TestProtos";
+
+// Embedded C internal options.
+//@max_repeated_length=100
+//@max_string_length=32
+
+enum PhoneType {
+  MOBILE = 0;
+  HOME = 1;
+  WORK = 2;
+}
+
+message PhoneNumber {
+  required float number = 1;
+  required PhoneType type = 2;
+}
+
+message Person {
+  required string name1 = 1;
+  required string name2 = 2;
+  required string name3 = 3;
+  required string name4 = 4;
+  required string name5 = 5;
+  required string name6= 6;
+  required int32 id = 7;
+  required float iq = 8;
+  required bool email = 9;
+  required PhoneType phone = 10;
+  repeated string strAttr = 11;
+  repeated int32 intAttr = 12;
+  repeated bool boolAttr = 13;
+  repeated float floatAttr = 14;
+  repeated PhoneType enumAttr = 15;
+}
+
+message AddressBook {
+  required string address = 1;
+}
+
+message Foo {
+}
