@@ -43,7 +43,7 @@ import org.antlr.stringtemplate.language.DefaultTemplateLexer;
  */
 public class Protoc {
 
-	public static final String VERSION = "0.1 (2011-AUG-01)";
+	public static final String VERSION = "0.2 (2011-###-##)";
 
 	private static boolean debug = false;
 
