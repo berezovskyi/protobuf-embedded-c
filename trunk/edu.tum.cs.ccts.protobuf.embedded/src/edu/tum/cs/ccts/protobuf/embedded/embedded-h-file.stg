@@ -28,7 +28,7 @@ typeMap ::= [
   "double":"double",
   "float":"float",
   "int32":"signed long",
-  "int64":"<UNSUPPORTED>",
+  "int64":"signed long long",
   "uint32":"unsigned long",
   "uint64":"<UNSUPPORTED>",
   "sint32":"signed long",

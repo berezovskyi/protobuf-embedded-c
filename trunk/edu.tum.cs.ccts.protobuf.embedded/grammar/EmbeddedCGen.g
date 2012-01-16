@@ -124,6 +124,8 @@ messageElement
 	     String type = $t.text;
 	     if (type.equals("int32")) {
 	       messageSize += repeatedLength * (2 + 10);
+	     } else if (type.equals("int64")) {
+	       messageSize += repeatedLength * (2 + 10);
 	     } else if (type.equals("string")) {
 	       Integer stringLength = annotationMap.get("max_string_length");
 	       if (stringLength == null) stringLength = 32;
