@@ -28,7 +28,7 @@ typeMap ::= [
   "double":"double",
   "float":"float",
   "int32":"signed long",
-  "int64":"<UNSUPPORTED>",
+  "int64":"signed long long",
   "uint32":"unsigned long",
   "uint64":"<UNSUPPORTED>",
   "sint32":"signed long",
@@ -43,7 +43,8 @@ typeMap ::= [
  
 wireTypeMap ::= ["int32":"0", "string":"2", "bool":"0", "float":"5"]
 
-intMap ::= ["int32":"true"] 
+int32Map ::= ["int32":"true"] 
+int64Map ::= ["int64":"true"] 
 stringMap ::= ["string":"true"] 
 boolMap ::= ["bool":"true"]
 floatMap ::= ["float":"true"]
@@ -118,6 +119,19 @@ int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
             } else {
               offset = write_raw_byte((char)value, _buffer, offset);
             }
+            return offset;
+        } else {
+            offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
+            value = value \>\> 7;
+        }
+    }
+    return offset;
+}
+
+int write_raw_varint64(unsigned long value, void *_buffer, int offset) {
+    while (1) {
+        if ((value & ~0x7FL) == 0) {
+            offset = write_raw_byte((char)value, _buffer, offset);
             return offset;
         } else {
             offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
@@ -210,6 +224,24 @@ int can_read_raw_varint32(void *_buffer, int offset, int length) {
     // Bound length to valid range [0..5].
     if (length < 0) length = 0; else
     if (length > 5) length = 5;
+    
+    while (length > 0) {
+        offset = read_raw_byte((char *)&c, _buffer, offset);
+        if (c >= 0) {
+            return 1; // Can read (1 == true).
+        }
+        length--;
+    }
+    
+    return 0; // Cannot read (0 == false).
+}
+
+int can_read_raw_varint64(void *_buffer, int offset, int length) {
+    signed char c;
+    
+    // Bound length to valid range [0..5].
+    if (length < 0) length = 0; else
+    if (length > 10) length = 10;
     
     while (length > 0) {
         offset = read_raw_byte((char *)&c, _buffer, offset);
@@ -344,11 +376,23 @@ caseElementTag(element) ::= <<
 //tag of: _$name$._$element.name$ 
 case $element.tag$ :
     $readInt32(element)$
+    $readInt64(element)$
     $readFloat(element)$
     $readBool(element)$
     $readEnum(element)$
     $readString(element)$
     break;
+>>
+
+readInt64(element) ::= <<
+$if(int64Map.(element.typeName))$
+offset = read_raw_varint64(&tag, _buffer, offset);
+$if(arrayModifiers.(element.modifier))$
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (signed long long)tag;
+$else$
+_$name$->_$element.name$ = (signed long long)tag;
+$endif$
+$endif$
 >>
 
 readString(element) ::= <<
@@ -407,7 +451,7 @@ $endif$
 >>
 
 readInt32(element) ::= <<
-$if(intMap.(element.typeName))$
+$if(int32Map.(element.typeName))$
 offset = read_raw_varint32(&tag, _buffer, offset);
 $if(arrayModifiers.(element.modifier))$
 _$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (signed long)tag;
@@ -424,6 +468,7 @@ tag = tag\>\>3;
 
 messageElementWriteTo(element) ::= <<
 $writeInt32(element)$
+$writeInt64(element)$
 $writeString(element)$
 $writeBool(element)$
 $writeFloat(element)$
@@ -505,7 +550,7 @@ offset = write_raw_bytes(_$name$-\>_$element.name$, _$name$-\>_$element.name$_le
 >>
 
 writeInt32(element) ::= <<
-$if(intMap.(element.typeName))$
+$if(int32Map.(element.typeName))$
 $if(arrayModifiers.(element.modifier))$
 int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
@@ -521,6 +566,25 @@ $endif$
 
 writeInt32NoTag(element) ::= <<
 offset = write_raw_varint32(_$name$-\>_$element.name$, _buffer, offset);
+>>
+
+writeInt64(element) ::= <<
+$if(int64Map.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    $writeTag(element)$
+    offset = write_raw_varint64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$else$
+$writeTag(element)$
+$writeInt64NoTag(element)$
+$endif$
+$endif$
+>>
+
+writeInt64NoTag(element) ::= <<
+offset = write_raw_varint64(_$name$-\>_$element.name$, _buffer, offset);
 >>
 
 writeTag(element) ::= <<
