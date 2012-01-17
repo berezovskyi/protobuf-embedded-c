@@ -41,7 +41,7 @@ typeMap ::= [
   "string":"char",
   "bytes":"char"]
  
-wireTypeMap ::= ["int32":"0", "string":"2", "bool":"0", "float":"5"]
+wireTypeMap ::= ["int32":"0", "int64":"0", "string":"2", "bool":"0", "float":"5"]
 
 int32Map ::= ["int32":"true"] 
 int64Map ::= ["int64":"true"] 
@@ -216,6 +216,20 @@ int read_raw_varint32(unsigned long *tag, void *_buffer, int offset) {
         }
     }
     return offset;
+}
+
+int read_raw_varint64(signed long long *tag, void *_buffer, int offset) {
+    short shift = 0;
+    signed char b;
+    while (shift < 64) {
+        offset = read_raw_byte((char *)&b, _buffer, offset);
+        *tag |= (signed long long)(b & 0x7F) << shift;
+        if ((b & 0x80) == 0) {
+            return offset;
+        }
+        shift += 7;
+    }
+    //return error code.
 }
 
 int can_read_raw_varint32(void *_buffer, int offset, int length) {
