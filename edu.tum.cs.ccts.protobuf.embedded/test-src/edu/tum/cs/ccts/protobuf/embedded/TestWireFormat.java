@@ -18,6 +18,7 @@
 package edu.tum.cs.ccts.protobuf.embedded;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,6 +76,7 @@ public class TestWireFormat {
 		for (int step = 0; step < NUMBER_OF_MULTIPLE_TESTS; ++step) {
 			Person.Builder iniPersonBuilder = Person.newBuilder();
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setId64(rand.nextLong());
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
 			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
@@ -97,6 +99,10 @@ public class TestWireFormat {
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addIntAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addInt64Attr(rand.nextInt(32000));
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -122,6 +128,7 @@ public class TestWireFormat {
 			lBuilder.clear();
 			Person.Builder iniPersonBuilder = Person.newBuilder();
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
 			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
@@ -147,6 +154,10 @@ public class TestWireFormat {
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addInt64Attr(rand.nextLong() - 10000000000L);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addBoolAttr(rand.nextBoolean());
 			}
 			repeatedNr = rand.nextInt(33);
@@ -167,6 +178,7 @@ public class TestWireFormat {
 		for (int step = 0; step < NUMBER_OF_MULTIPLE_TESTS; ++step) {
 			Person.Builder iniPersonBuilder = Person.newBuilder();
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
 			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
@@ -188,6 +200,7 @@ public class TestWireFormat {
 		for (int step = 0; step < NUMBER_OF_TESTS; ++step) {
 			Person.Builder iniPersonBuilder = Person.newBuilder();
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
 			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
@@ -238,6 +251,7 @@ public class TestWireFormat {
 							Person.Builder iniPersonBuilder = Person
 									.newBuilder();
 							iniPersonBuilder.setId(i);
+							iniPersonBuilder.setId64(i);
 							iniPersonBuilder.setIq(f);
 							iniPersonBuilder.setEmail(b);
 							iniPersonBuilder.setPhone(PhoneType
@@ -303,6 +317,8 @@ public class TestWireFormat {
 				if (lBuilder.size() == 1) {
 					Assert.assertEquals(iniPerson.getId(),
 							parseInt(p.getProperty("id")));
+					Assert.assertEquals(iniPerson.getId64(),
+							parseLong(p.getProperty("id64")));
 					Assert.assertEquals(limitFloat(iniPerson.getIq()),
 							limitFloat(Float.parseFloat(p.getProperty("iq"))));
 					Assert.assertEquals(iniPerson.getEmail(), parseInt(p

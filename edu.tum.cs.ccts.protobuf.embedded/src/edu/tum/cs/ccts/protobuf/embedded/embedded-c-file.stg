@@ -128,7 +128,7 @@ int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
     return offset;
 }
 
-int write_raw_varint64(unsigned long value, void *_buffer, int offset) {
+int write_raw_varint64(unsigned long long value, void *_buffer, int offset) {
     while (1) {
         if ((value & ~0x7FL) == 0) {
             offset = write_raw_byte((char)value, _buffer, offset);
@@ -218,18 +218,20 @@ int read_raw_varint32(unsigned long *tag, void *_buffer, int offset) {
     return offset;
 }
 
-int read_raw_varint64(signed long long *tag, void *_buffer, int offset) {
+int read_raw_varint64(unsigned long long *tag, void *_buffer, int offset) {
     short shift = 0;
     signed char b;
+    *tag = 0;
     while (shift < 64) {
         offset = read_raw_byte((char *)&b, _buffer, offset);
-        *tag |= (signed long long)(b & 0x7F) << shift;
+        *tag |= (unsigned long long)(b & 0x7F) << shift;
         if ((b & 0x80) == 0) {
             return offset;
         }
         shift += 7;
     }
     //return error code.
+    return -1;
 }
 
 int can_read_raw_varint32(void *_buffer, int offset, int length) {
@@ -360,6 +362,7 @@ $if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
 int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
+    unsigned long long value = i;
 
     $if(empty)$$else$/* Reset all attributes to 0 in advance. */
     $name$_clear(_$name$);$endif$
@@ -400,11 +403,11 @@ case $element.tag$ :
 
 readInt64(element) ::= <<
 $if(int64Map.(element.typeName))$
-offset = read_raw_varint64(&tag, _buffer, offset);
+offset = read_raw_varint64(&value, _buffer, offset);
 $if(arrayModifiers.(element.modifier))$
-_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (signed long long)tag;
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (signed long long)value;
 $else$
-_$name$->_$element.name$ = (signed long long)tag;
+_$name$->_$element.name$ = (signed long long)value;
 $endif$
 $endif$
 >>
