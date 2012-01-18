@@ -41,13 +41,14 @@ typeMap ::= [
   "string":"char",
   "bytes":"char"]
  
-wireTypeMap ::= ["int32":"0", "int64":"0", "string":"2", "bool":"0", "float":"5"]
+wireTypeMap ::= ["int32":"0", "int64":"0", "string":"2", "bool":"0", "float":"5", "double":"1"]
 
 int32Map ::= ["int32":"true"] 
 int64Map ::= ["int64":"true"] 
 stringMap ::= ["string":"true"] 
 boolMap ::= ["bool":"true"]
 floatMap ::= ["float":"true"]
+doubleMap ::= ["double":"true"]
 
 arrayTypes ::= ["string":"true", "bytes":"true"]
 fixedSizeMap ::= ["double":"8", "float":"4", "fixed32":"4", "sfixed32":"4", "bool":"1"]
@@ -100,6 +101,20 @@ int write_raw_little_endian32(unsigned long value, void *_buffer, int offset) {
     offset = write_raw_byte((char)((value \>\>  8) & 0xFF), _buffer, offset);
     offset = write_raw_byte((char)((value \>\> 16) & 0xFF), _buffer, offset);
     offset = write_raw_byte((char)((value \>\> 24) & 0xFF), _buffer, offset);
+    
+    return offset;
+}
+
+/** Write a little-endian 64-bit integer. */
+int write_raw_little_endian64(unsigned long long value, void *_buffer, int offset) {
+    offset = write_raw_byte((char)((value      ) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\>  8) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 16) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 24) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 32) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 40) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 48) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value \>\> 56) & 0xFF), _buffer, offset);
     
     return offset;
 }
@@ -171,6 +186,37 @@ int read_raw_little_endian32(unsigned long *tag, void *_buffer, int offset) {
            (((unsigned long)b2 & 0xff) <<  8) |
            (((unsigned long)b3 & 0xff) << 16) |
            (((unsigned long)b4 & 0xff) << 24);
+           
+    return offset;
+}
+
+/** Read a 64-bit little-endian integer from the stream. */
+int read_raw_little_endian64(unsigned long long *tag, void *_buffer, int offset) {
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b1 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b2 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b3 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b4 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b5 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b6 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b7 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b8 = (char) *tag;
+    
+    *tag = (((unsigned long long)b1 & 0xff)      ) |
+           (((unsigned long long)b2 & 0xff) <<  8) |
+           (((unsigned long long)b3 & 0xff) << 16) |
+           (((unsigned long long)b4 & 0xff) << 24) |
+           (((unsigned long long)b5 & 0xff) << 32) |
+           (((unsigned long long)b6 & 0xff) << 40) |
+           (((unsigned long long)b7 & 0xff) << 48) |
+           (((unsigned long long)b8 & 0xff) << 56);
            
     return offset;
 }
@@ -395,6 +441,7 @@ case $element.tag$ :
     $readInt32(element)$
     $readInt64(element)$
     $readFloat(element)$
+    $readDouble(element)$
     $readBool(element)$
     $readEnum(element)$
     $readString(element)$
@@ -467,6 +514,18 @@ $endif$
 $endif$
 >>
 
+readDouble(element) ::= <<
+$if(doubleMap.(element.typeName))$
+offset = read_raw_little_endian64(&value, _buffer, offset);
+double *$element.name$ = (double *)(&value);
+$if(arrayModifiers.(element.modifier))$
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = *$element.name$;
+$else$
+_$name$->_$element.name$ = *$element.name$;
+$endif$
+$endif$
+>>
+
 readInt32(element) ::= <<
 $if(int32Map.(element.typeName))$
 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -489,6 +548,7 @@ $writeInt64(element)$
 $writeString(element)$
 $writeBool(element)$
 $writeFloat(element)$
+$writeDouble(element)$
 $writeMessageEnum(element)$
 >>
 
@@ -524,6 +584,27 @@ $endif$
 writeFloatNoTag(element) ::= <<
 unsigned long *$element.name$_ptr = (unsigned long *)&_$name$-\>_$element.name$;
 offset = write_raw_little_endian32(*$element.name$_ptr, _buffer, offset);
+>>
+
+writeDouble(element) ::= <<
+$if(doubleMap.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    $writeTag(element)$
+    unsigned long long *$element.name$_ptr = (unsigned long long*)&_$name$-\>_$element.name$[$element.name$_cnt];
+    offset = write_raw_little_endian64(*$element.name$_ptr, _buffer, offset);
+}
+$else$
+$writeTag(element)$
+$writeDoubleNoTag(element)$
+$endif$
+$endif$
+>>
+
+writeDoubleNoTag(element) ::= <<
+unsigned long long *$element.name$_ptr = (unsigned long long*)&_$name$-\>_$element.name$;
+offset = write_raw_little_endian64(*$element.name$_ptr, _buffer, offset);
 >>
 
 writeBool(element) ::= <<

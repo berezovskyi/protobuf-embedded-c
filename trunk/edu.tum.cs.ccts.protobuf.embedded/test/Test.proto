@@ -28,6 +28,7 @@ message Person {
   required int32 id = 7;
   required int64 id64 = 16;
   required float iq = 8;
+  required double iqd = 18;
   required bool email = 9;
   required PhoneType phone = 10;
   repeated string strAttr = 11;
@@ -35,6 +36,7 @@ message Person {
   repeated int64 int64Attr = 17;
   repeated bool boolAttr = 13;
   repeated float floatAttr = 14;
+  repeated double doubleAttr = 19;
   repeated PhoneType enumAttr = 15;
 }
 
