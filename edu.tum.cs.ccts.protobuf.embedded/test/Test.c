@@ -47,6 +47,20 @@ int write_raw_little_endian32(unsigned long value, void *_buffer, int offset) {
     return offset;
 }
 
+/** Write a little-endian 64-bit integer. */
+int write_raw_little_endian64(unsigned long long value, void *_buffer, int offset) {
+    offset = write_raw_byte((char)((value      ) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >>  8) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 16) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 24) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 32) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 40) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 48) & 0xFF), _buffer, offset);
+    offset = write_raw_byte((char)((value >> 56) & 0xFF), _buffer, offset);
+    
+    return offset;
+}
+
 int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
     unsigned long sign = 1 & (value >> 31);
     while (1) {
@@ -114,6 +128,37 @@ int read_raw_little_endian32(unsigned long *tag, void *_buffer, int offset) {
            (((unsigned long)b2 & 0xff) <<  8) |
            (((unsigned long)b3 & 0xff) << 16) |
            (((unsigned long)b4 & 0xff) << 24);
+           
+    return offset;
+}
+
+/** Read a 64-bit little-endian integer from the stream. */
+int read_raw_little_endian64(unsigned long long *tag, void *_buffer, int offset) {
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b1 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b2 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b3 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b4 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b5 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b6 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b7 = (char) *tag;
+    offset = read_raw_byte((char *)tag, _buffer, offset);
+    char b8 = (char) *tag;
+    
+    *tag = (((unsigned long long)b1 & 0xff)      ) |
+           (((unsigned long long)b2 & 0xff) <<  8) |
+           (((unsigned long long)b3 & 0xff) << 16) |
+           (((unsigned long long)b4 & 0xff) << 24) |
+           (((unsigned long long)b5 & 0xff) << 32) |
+           (((unsigned long long)b6 & 0xff) << 40) |
+           (((unsigned long long)b7 & 0xff) << 48) |
+           (((unsigned long long)b8 & 0xff) << 56);
            
     return offset;
 }
@@ -371,6 +416,10 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     unsigned long *iq_ptr = (unsigned long *)&_Person->_iq;
     offset = write_raw_little_endian32(*iq_ptr, _buffer, offset);
 
+    offset = write_raw_varint32((18<<3)+1, _buffer, offset);
+    unsigned long long *iqd_ptr = (unsigned long long*)&_Person->_iqd;
+    offset = write_raw_little_endian64(*iqd_ptr, _buffer, offset);
+
     offset = write_raw_varint32((9<<3)+0, _buffer, offset);
     offset = write_raw_byte(_Person->_email, _buffer, offset);
 
@@ -405,6 +454,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_varint32((14<<3)+5, _buffer, offset);
         unsigned long *floatAttr_ptr = (unsigned long *)&_Person->_floatAttr[floatAttr_cnt];
         offset = write_raw_little_endian32(*floatAttr_ptr, _buffer, offset);
+    }
+
+    int doubleAttr_cnt;
+    for (doubleAttr_cnt = 0; doubleAttr_cnt < _Person->_doubleAttr_repeated_len; ++ doubleAttr_cnt) {
+        offset = write_raw_varint32((19<<3)+1, _buffer, offset);
+        unsigned long long *doubleAttr_ptr = (unsigned long long*)&_Person->_doubleAttr[doubleAttr_cnt];
+        offset = write_raw_little_endian64(*doubleAttr_ptr, _buffer, offset);
     }
 
     int enumAttr_cnt;
@@ -519,6 +575,12 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 float *iq = (float *)(&tag);
                 _Person->_iq = *iq;
                 break;
+            //tag of: _Person._iqd 
+            case 18 :
+                offset = read_raw_little_endian64(&value, _buffer, offset);
+                double *iqd = (double *)(&value);
+                _Person->_iqd = *iqd;
+                break;
             //tag of: _Person._email 
             case 9 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -563,6 +625,12 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 float *floatAttr = (float *)(&tag);
                 _Person->_floatAttr[(int)_Person->_floatAttr_repeated_len++] = *floatAttr;
                 break;
+            //tag of: _Person._doubleAttr 
+            case 19 :
+                offset = read_raw_little_endian64(&value, _buffer, offset);
+                double *doubleAttr = (double *)(&value);
+                _Person->_doubleAttr[(int)_Person->_doubleAttr_repeated_len++] = *doubleAttr;
+                break;
             //tag of: _Person._enumAttr 
             case 15 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -585,7 +653,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 41
+ * Message: Test.proto, line 43
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -662,7 +730,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 45
+ * Message: Test.proto, line 47
  *******************************************************************/
 int Foo_write(void *_buffer, int offset) {
     /* Write content of each message element.*/

@@ -132,6 +132,8 @@ messageElement
 	       messageSize += repeatedLength * (2 + 1 + stringLength);
 	     } else if (type.equals("float")) {
 	       messageSize += repeatedLength * (2 + 4);
+	     } else if (type.equals("double")) {
+         messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("bool")) {
          messageSize += repeatedLength * (2 + 1);
        } else { 
