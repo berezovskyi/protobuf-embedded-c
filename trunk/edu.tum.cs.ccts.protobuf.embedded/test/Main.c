@@ -85,6 +85,7 @@ int main () {
     	FILE *fw = fopen("Test.properties", "w");
     	fprintf(fw, "id=%ld\n", rperson[0]._id);
     	fprintf(fw, "id64=%lld\n", rperson[0]._id64);
+    	fprintf(fw, "sid=%ld\n", rperson[0]._sid);
     	fprintf(fw, "name1=");
     	print_string(rperson[0]._name1_len, fw, rperson[0]._name1);
     	fprintf(fw, "name2=");
