@@ -104,7 +104,7 @@ MODIFIER
 
 TYPE
 	:	'float' | 'double' | 'int32' | 'int64' | 'sint32' | 'sint64' | 
-	    'unit32' |'bool' | 'string'
+	    'uint32' | 'unit64' | 'bool' | 'string'
 	;
 
 STRING
