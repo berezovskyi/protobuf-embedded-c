@@ -30,7 +30,7 @@ typeMap ::= [
   "int32":"signed long",
   "int64":"signed long long",
   "uint32":"unsigned long",
-  "uint64":"<UNSUPPORTED>",
+  "uint64":"unsigned long long",
   "sint32":"signed long",
   "sint64":"signed long long",
   "fixed32":"unsigned long",
