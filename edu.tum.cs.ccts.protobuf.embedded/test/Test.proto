@@ -29,6 +29,7 @@ message Person {
   required int64 id64 = 16;
   required sint32 sid = 20;
   required sint64 sid64 = 22;
+  required uint32 uid = 24;
   required float iq = 8;
   required double iqd = 18;
   required bool email = 9;
@@ -38,6 +39,7 @@ message Person {
   repeated int64 int64Attr = 17;
   repeated sint32 sintAttr = 21;
   repeated sint64 sintAttr64 = 23;
+  repeated uint32 uintAttr = 25;
   repeated bool boolAttr = 13;
   repeated float floatAttr = 14;
   repeated double doubleAttr = 19;
