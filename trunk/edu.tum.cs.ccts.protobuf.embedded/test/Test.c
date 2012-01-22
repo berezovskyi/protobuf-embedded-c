@@ -62,20 +62,9 @@ int write_raw_little_endian64(unsigned long long value, void *_buffer, int offse
 }
 
 int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
-    unsigned long sign = 1 & (value >> 31);
     while (1) {
         if ((value & ~0x7F) == 0) {
-             if (sign) {
-              // Must sign extend to 64 bit.
-              offset = write_raw_byte(0xF0 | value, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(1, _buffer, offset);
-            } else {
-              offset = write_raw_byte((char)value, _buffer, offset);
-            }
+            offset = write_raw_byte((char)value, _buffer, offset);
             return offset;
         } else {
             offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
@@ -425,7 +414,10 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     offset = write_raw_bytes(_Person->_name6, _Person->_name6_len, _buffer, offset);
 
     offset = write_raw_varint32((7<<3)+0, _buffer, offset);
-    offset = write_raw_varint32(_Person->_id, _buffer, offset);
+    if (_Person->_id >= 0)
+        offset = write_raw_varint32(_Person->_id, _buffer, offset);
+    else
+        offset = write_raw_varint64(_Person->_id, _buffer, offset);
 
     offset = write_raw_varint32((16<<3)+0, _buffer, offset);
     offset = write_raw_varint64(_Person->_id64, _buffer, offset);
@@ -458,7 +450,10 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     int intAttr_cnt;
     for (intAttr_cnt = 0; intAttr_cnt < _Person->_intAttr_repeated_len; ++ intAttr_cnt) {
         offset = write_raw_varint32((12<<3)+0, _buffer, offset);
-        offset = write_raw_varint32(_Person->_intAttr[intAttr_cnt], _buffer, offset);
+        if (_Person->_intAttr[intAttr_cnt] >= 0)
+            offset = write_raw_varint32(_Person->_intAttr[intAttr_cnt], _buffer, offset);
+        else
+            offset = write_raw_varint64(_Person->_intAttr[intAttr_cnt], _buffer, offset);
     }
 
     int int64Attr_cnt;
