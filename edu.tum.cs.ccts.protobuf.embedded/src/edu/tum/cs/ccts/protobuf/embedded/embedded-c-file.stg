@@ -123,20 +123,9 @@ int write_raw_little_endian64(unsigned long long value, void *_buffer, int offse
 }
 
 int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
-    unsigned long sign = 1 & (value \>\> 31);
     while (1) {
         if ((value & ~0x7F) == 0) {
-             if (sign) {
-              // Must sign extend to 64 bit.
-              offset = write_raw_byte(0xF0 | value, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(255, _buffer, offset);
-              offset = write_raw_byte(1, _buffer, offset);
-            } else {
-              offset = write_raw_byte((char)value, _buffer, offset);
-            }
+            offset = write_raw_byte((char)value, _buffer, offset);
             return offset;
         } else {
             offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
@@ -700,7 +689,10 @@ $if(arrayModifiers.(element.modifier))$
 int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
-    offset = write_raw_varint32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+    if (_$name$-\>_$element.name$[$element.name$_cnt] >= 0)
+        offset = write_raw_varint32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+    else
+        offset = write_raw_varint64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
 $else$
 $writeTag(element)$
@@ -710,7 +702,10 @@ $endif$
 >>
 
 writeInt32NoTag(element) ::= <<
-offset = write_raw_varint32(_$name$-\>_$element.name$, _buffer, offset);
+if (_$name$-\>_$element.name$ >= 0)
+    offset = write_raw_varint32(_$name$-\>_$element.name$, _buffer, offset);
+else
+    offset = write_raw_varint64(_$name$-\>_$element.name$, _buffer, offset);
 >>
 
 writeInt64(element) ::= <<
