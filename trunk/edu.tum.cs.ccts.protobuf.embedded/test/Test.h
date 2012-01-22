@@ -77,7 +77,7 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
  *******************************************************************/
 
 /* Maximum size of a serialized Person-message, useful for buffer allocation. */
-#define MAX_Person_SIZE 8358
+#define MAX_Person_SIZE 9065
 
 /* Structure that holds a deserialized Person-message. */
 struct Person {
@@ -95,6 +95,7 @@ struct Person {
   char _name6[MAX_STRING_LEN];
   signed long _id;
   signed long long _id64;
+  signed long _sid;
   float _iq;
   double _iqd;
   char _email;
@@ -106,6 +107,8 @@ struct Person {
   signed long _intAttr[MAX_REPEATED_LEN];
   int _int64Attr_repeated_len;
   signed long long _int64Attr[MAX_REPEATED_LEN];
+  int _sintAttr_repeated_len;
+  signed long _sintAttr[MAX_REPEATED_LEN];
   int _boolAttr_repeated_len;
   char _boolAttr[MAX_REPEATED_LEN];
   int _floatAttr_repeated_len;
@@ -131,7 +134,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 43
+ * Message: Test.proto, line 45
  *******************************************************************/
 
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
@@ -158,7 +161,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 47
+ * Message: Test.proto, line 49
  *******************************************************************/
 
 /* Maximum size of a serialized Foo-message, useful for buffer allocation. */
