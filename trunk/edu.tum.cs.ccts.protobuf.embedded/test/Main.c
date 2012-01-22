@@ -26,6 +26,8 @@
 
 #include <stdlib.h>
 
+char _buffer[1024*1024];
+
 void print_string(int str_len, FILE *fw, char str[]) {
 	int i;
     for(i = 0;i < str_len;++i)
@@ -39,11 +41,8 @@ int main () {
 	int pos, shift = 0;
 	char c;
 	int size, tmp, cnt = 0;
-	struct Person rperson[128];
-	char _buffer[1024*1024];
+	struct Person rperson[101];
 
-	for (i = 0; i < 1024; ++ i)
-		_buffer[i] = 0;
 	FILE *finr = fopen ("Test.in", "rb");
 
 	pos = 0;
@@ -62,6 +61,7 @@ int main () {
 			fscanf(finr, "%c", &_buffer[i + shift]);
 		pos += size + shift;
 	}
+
 	old_offset = 0;
 	while (_buffer[offset] != 0) {
 		offset = Person_read_delimited_from(_buffer, &rperson[cnt++], old_offset);
@@ -86,6 +86,7 @@ int main () {
     	fprintf(fw, "id=%ld\n", rperson[0]._id);
     	fprintf(fw, "id64=%lld\n", rperson[0]._id64);
     	fprintf(fw, "sid=%ld\n", rperson[0]._sid);
+    	fprintf(fw, "sid64=%lld\n", rperson[0]._sid64);
     	fprintf(fw, "name1=");
     	print_string(rperson[0]._name1_len, fw, rperson[0]._name1);
     	fprintf(fw, "name2=");

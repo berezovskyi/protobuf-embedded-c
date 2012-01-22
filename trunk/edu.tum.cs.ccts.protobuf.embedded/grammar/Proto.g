@@ -103,7 +103,7 @@ MODIFIER
 	;
 
 TYPE
-	:	'float' | 'double' | 'int32' | 'int64' | 'sint32' | 'bool' | 'string'
+	:	'float' | 'double' | 'int32' | 'int64' | 'sint32' | 'sint64' | 'bool' | 'string'
 	;
 
 STRING

@@ -128,6 +128,8 @@ messageElement
          messageSize += repeatedLength * (2 + 10);
        } else if (type.equals("sint32")) {
          messageSize += repeatedLength * (2 + 5);
+       } else if (type.equals("sint64")) {
+         messageSize += repeatedLength * (2 + 10);
        } else if (type.equals("string")) {
 	       Integer stringLength = annotationMap.get("max_string_length");
 	       if (stringLength == null) stringLength = 32;

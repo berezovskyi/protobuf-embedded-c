@@ -112,9 +112,18 @@ unsigned long encode_zig_zag32(signed long n) {
     return (n << 1) ^ (n >> 31);
 }
 
- signed long decode_zig_zag32(unsigned long n) {
+unsigned long long encode_zig_zag64(signed long long n) {
+    // Note:  the right-shift must be arithmetic
+    return (n << 1) ^ (n >> 63);
+} 
+
+signed long decode_zig_zag32(unsigned long n) {
     return (n >> 1) ^ -(n & 1);
- }
+}
+
+signed long long decode_zig_zag64(unsigned long long n) {
+    return (n >> 1) ^ -(n & 1);
+}
 
 int read_raw_byte(char *tag, void *_buffer, int offset) {
     *tag = *((char *) _buffer + offset);
@@ -424,6 +433,9 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     offset = write_raw_varint32((20<<3)+0, _buffer, offset);
     offset = write_raw_varint32(encode_zig_zag32(_Person->_sid), _buffer, offset);
 
+    offset = write_raw_varint32((22<<3)+0, _buffer, offset);
+    offset = write_raw_varint64(encode_zig_zag64(_Person->_sid64), _buffer, offset);
+
     offset = write_raw_varint32((8<<3)+5, _buffer, offset);
     unsigned long *iq_ptr = (unsigned long *)&_Person->_iq;
     offset = write_raw_little_endian32(*iq_ptr, _buffer, offset);
@@ -459,6 +471,12 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     for (sintAttr_cnt = 0; sintAttr_cnt < _Person->_sintAttr_repeated_len; ++ sintAttr_cnt) {
         offset = write_raw_varint32((21<<3)+0, _buffer, offset);
         offset = write_raw_varint32(encode_zig_zag32(_Person->_sintAttr[sintAttr_cnt]), _buffer, offset);
+    }
+
+    int sintAttr64_cnt;
+    for (sintAttr64_cnt = 0; sintAttr64_cnt < _Person->_sintAttr64_repeated_len; ++ sintAttr64_cnt) {
+        offset = write_raw_varint32((23<<3)+0, _buffer, offset);
+        offset = write_raw_varint64(encode_zig_zag64(_Person->_sintAttr64[sintAttr64_cnt]), _buffer, offset);
     }
 
     int boolAttr_cnt;
@@ -592,6 +610,11 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_sid = decode_zig_zag32(tag);
                 break;
+            //tag of: _Person._sid64 
+            case 22 :
+                offset = read_raw_varint64(&value, _buffer, offset);
+                _Person->_sid64 = decode_zig_zag64(value);
+                break;
             //tag of: _Person._iq 
             case 8 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
@@ -642,6 +665,11 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_sintAttr[(int)_Person->_sintAttr_repeated_len++] = decode_zig_zag32(tag);
                 break;
+            //tag of: _Person._sintAttr64 
+            case 23 :
+                offset = read_raw_varint64(&value, _buffer, offset);
+                _Person->_sintAttr64[(int)_Person->_sintAttr64_repeated_len++] = decode_zig_zag64(value);
+                break;
             //tag of: _Person._boolAttr 
             case 13 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -681,7 +709,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 45
+ * Message: Test.proto, line 47
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -758,7 +786,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 49
+ * Message: Test.proto, line 51
  *******************************************************************/
 int Foo_write(void *_buffer, int offset) {
     /* Write content of each message element.*/
