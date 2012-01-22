@@ -40,7 +40,7 @@ import java.util.Arrays;
 @members {
 private HashSet<String> nameScope = new HashSet<String>();
 private HashSet<Integer> valueScope = new HashSet<Integer>();
-String[] types = { "int32", "int64", "sint32", "bool", "string", "float", "double" };
+String[] types = { "int32", "int64", "sint32", "sint64", "bool", "string", "float", "double" };
 private final HashSet<String> dataTypes = new HashSet<String>(Arrays.asList(types));
 private HashSet<String> globalNameScope = new HashSet<String>();
 public int constraintErrors = 0;

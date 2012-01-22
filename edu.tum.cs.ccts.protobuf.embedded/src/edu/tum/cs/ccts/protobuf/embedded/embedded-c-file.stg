@@ -32,7 +32,7 @@ typeMap ::= [
   "uint32":"unsigned long",
   "uint64":"<UNSUPPORTED>",
   "sint32":"signed long",
-  "sint64":"<UNSUPPORTED>",
+  "sint64":"signed long long",
   "fixed32":"unsigned long",
   "fixed64":"<UNSUPPORTED>",
   "sfixed32":"signed long",
@@ -41,12 +41,13 @@ typeMap ::= [
   "string":"char",
   "bytes":"char"]
  
-wireTypeMap ::= ["int32":"0", "int64":"0", "sint32":"0", "string":"2", 
-                    "bool":"0", "float":"5", "double":"1"]
+wireTypeMap ::= ["int32":"0", "int64":"0", "sint32":"0", "sint64":"0",
+                     "string":"2", "bool":"0", "float":"5", "double":"1"]
 
 int32Map ::= ["int32":"true"] 
 int64Map ::= ["int64":"true"]
 sint32Map ::= ["sint32":"true"] 
+sint64Map ::= ["sint64":"true"] 
 stringMap ::= ["string":"true"] 
 boolMap ::= ["bool":"true"]
 floatMap ::= ["float":"true"]
@@ -172,9 +173,18 @@ unsigned long encode_zig_zag32(signed long n) {
     return (n << 1) ^ (n \>\> 31);
 }
 
- signed long decode_zig_zag32(unsigned long n) {
+unsigned long long encode_zig_zag64(signed long long n) {
+    // Note:  the right-shift must be arithmetic
+    return (n << 1) ^ (n \>\> 63);
+} 
+
+signed long decode_zig_zag32(unsigned long n) {
     return (n \>\> 1) ^ -(n & 1);
- }
+}
+
+signed long long decode_zig_zag64(unsigned long long n) {
+    return (n \>\> 1) ^ -(n & 1);
+}
 
 int read_raw_byte(char *tag, void *_buffer, int offset) {
     *tag = *((char *) _buffer + offset);
@@ -452,6 +462,7 @@ case $element.tag$ :
     $readInt32(element)$
     $readInt64(element)$
     $readSInt32(element)$
+    $readSInt64(element)$
     $readFloat(element)$
     $readDouble(element)$
     $readBool(element)$
@@ -560,6 +571,17 @@ $endif$
 $endif$
 >>
 
+readSInt64(element) ::= <<
+$if(sint64Map.(element.typeName))$
+offset = read_raw_varint64(&value, _buffer, offset);
+$if(arrayModifiers.(element.modifier))$
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = decode_zig_zag64(value);
+$else$
+_$name$->_$element.name$ = decode_zig_zag64(value);
+$endif$
+$endif$
+>>
+
 readTag() ::= <<
 offset = read_raw_varint32(&tag, _buffer, offset);
 tag = tag\>\>3;
@@ -569,6 +591,7 @@ messageElementWriteTo(element) ::= <<
 $writeInt32(element)$
 $writeInt64(element)$
 $writeSInt32(element)$
+$writeSInt64(element)$
 $writeString(element)$
 $writeBool(element)$
 $writeFloat(element)$
@@ -705,6 +728,10 @@ $endif$
 $endif$
 >>
 
+writeInt64NoTag(element) ::= <<
+offset = write_raw_varint64(_$name$-\>_$element.name$, _buffer, offset);
+>>
+
 writeSInt32(element) ::= <<
 $if(sint32Map.(element.typeName))$
 $if(arrayModifiers.(element.modifier))$
@@ -724,8 +751,23 @@ writeSInt32NoTag(element) ::= <<
 offset = write_raw_varint32(encode_zig_zag32(_$name$-\>_$element.name$), _buffer, offset);
 >>
 
-writeInt64NoTag(element) ::= <<
-offset = write_raw_varint64(_$name$-\>_$element.name$, _buffer, offset);
+writeSInt64(element) ::= <<
+$if(sint64Map.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    $writeTag(element)$
+    offset = write_raw_varint64(encode_zig_zag64(_$name$-\>_$element.name$[$element.name$_cnt]), _buffer, offset);
+}
+$else$
+$writeTag(element)$
+$writeSInt64NoTag(element)$
+$endif$
+$endif$
+>>
+
+writeSInt64NoTag(element) ::= <<
+offset = write_raw_varint64(encode_zig_zag64(_$name$-\>_$element.name$), _buffer, offset);
 >>
 
 writeTag(element) ::= <<
