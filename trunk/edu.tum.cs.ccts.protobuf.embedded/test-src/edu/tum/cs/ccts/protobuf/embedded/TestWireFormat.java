@@ -82,6 +82,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setSid64(rand.nextLong());
 			iniPersonBuilder.setUid(rand.nextInt(32000));
 			iniPersonBuilder.setUid64(rand.nextLong());
+			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -160,6 +161,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setUid(rand.nextInt(32000));
 			iniPersonBuilder.setUid64(rand.nextLong());
+			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -236,6 +238,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setUid(rand.nextInt(32000));
 			iniPersonBuilder.setUid64(rand.nextLong());
+			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -263,6 +266,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setUid(rand.nextInt(32000));
 			iniPersonBuilder.setUid64(rand.nextLong());
+			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -293,7 +297,7 @@ public class TestWireFormat {
 		int32Classes.add(1);
 		int32Classes.add(-1);
 		int32Classes.add(Integer.MAX_VALUE);
-		int32Classes.add(Integer.MIN_VALUE);
+		int32Classes.add(Integer.MIN_VALUE + 1);
 
 		List<Float> floatClasses = new ArrayList<Float>();
 		floatClasses.add(+0.0f);
@@ -328,7 +332,13 @@ public class TestWireFormat {
 								iniPersonBuilder.setUid64(i);
 							}
 							iniPersonBuilder.setSid(i);
-							iniPersonBuilder.setUid(i);
+							if (i < 0) {
+								iniPersonBuilder.setUid(-i);
+								iniPersonBuilder.setFid32(-i);
+							} else {
+								iniPersonBuilder.setUid(i);
+								iniPersonBuilder.setFid32(i);
+							}
 							iniPersonBuilder.setIq(f);
 							iniPersonBuilder.setIqd(f);
 							iniPersonBuilder.setEmail(b);
@@ -405,6 +415,8 @@ public class TestWireFormat {
 							parseInt(p.getProperty("uid")));
 					Assert.assertEquals(iniPerson.getUid64(),
 							parseLong(p.getProperty("uid64")));
+					Assert.assertEquals(iniPerson.getFid32(),
+							parseInt(p.getProperty("fid32")));
 					Assert.assertEquals(limitFloat(iniPerson.getIq()),
 							limitFloat(Float.parseFloat(p.getProperty("iq"))));
 					Assert.assertTrue(abs(iniPerson.getIqd()

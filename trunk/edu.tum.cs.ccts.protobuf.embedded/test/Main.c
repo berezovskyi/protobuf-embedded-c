@@ -89,6 +89,7 @@ int main () {
     	fprintf(fw, "sid64=%lld\n", rperson[0]._sid64);
     	fprintf(fw, "uid=%ld\n", rperson[0]._uid);
     	fprintf(fw, "uid64=%lld\n", rperson[0]._uid64);
+    	fprintf(fw, "fid32=%ld\n", rperson[0]._fid32);
     	fprintf(fw, "name1=");
     	print_string(rperson[0]._name1_len, fw, rperson[0]._name1);
     	fprintf(fw, "name2=");
