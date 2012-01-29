@@ -434,6 +434,9 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     offset = write_raw_varint32((26<<3)+0, _buffer, offset);
     offset = write_raw_varint64(_Person->_uid64, _buffer, offset);
 
+    offset = write_raw_varint32((28<<3)+5, _buffer, offset);
+    offset = write_raw_little_endian32(_Person->_fid32, _buffer, offset);
+
     offset = write_raw_varint32((8<<3)+5, _buffer, offset);
     unsigned long *iq_ptr = (unsigned long *)&_Person->_iq;
     offset = write_raw_little_endian32(*iq_ptr, _buffer, offset);
@@ -490,6 +493,12 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     for (uintAttr64_cnt = 0; uintAttr64_cnt < _Person->_uintAttr64_repeated_len; ++ uintAttr64_cnt) {
         offset = write_raw_varint32((27<<3)+0, _buffer, offset);
         offset = write_raw_varint64(_Person->_uintAttr64[uintAttr64_cnt], _buffer, offset);
+    }
+
+    int fintAttr_cnt;
+    for (fintAttr_cnt = 0; fintAttr_cnt < _Person->_fintAttr_repeated_len; ++ fintAttr_cnt) {
+        offset = write_raw_varint32((29<<3)+5, _buffer, offset);
+        offset = write_raw_little_endian32(_Person->_fintAttr[fintAttr_cnt], _buffer, offset);
     }
 
     int boolAttr_cnt;
@@ -631,12 +640,17 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
             //tag of: _Person._uid 
             case 24 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
-                _Person->_uid = (unsigned long)tag;
+                _Person->_uid = tag;
                 break;
             //tag of: _Person._uid64 
             case 26 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_uid64 = value;
+                break;
+            //tag of: _Person._fid32 
+            case 28 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                _Person->_fid32 = tag;
                 break;
             //tag of: _Person._iq 
             case 8 :
@@ -696,12 +710,17 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
             //tag of: _Person._uintAttr 
             case 25 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
-                _Person->_uintAttr[(int)_Person->_uintAttr_repeated_len++] = (unsigned long)tag;
+                _Person->_uintAttr[(int)_Person->_uintAttr_repeated_len++] = tag;
                 break;
             //tag of: _Person._uintAttr64 
             case 27 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_uintAttr64[(int)_Person->_uintAttr64_repeated_len++] = value;
+                break;
+            //tag of: _Person._fintAttr 
+            case 29 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                _Person->_fintAttr[(int)_Person->_fintAttr_repeated_len++] = tag;
                 break;
             //tag of: _Person._boolAttr 
             case 13 :
@@ -742,7 +761,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 51
+ * Message: Test.proto, line 53
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -819,7 +838,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 55
+ * Message: Test.proto, line 57
  *******************************************************************/
 int Foo_write(void *_buffer, int offset) {
     /* Write content of each message element.*/

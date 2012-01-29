@@ -42,7 +42,8 @@ typeMap ::= [
   "bytes":"char"]
  
 wireTypeMap ::= ["int32":"0", "int64":"0", "sint32":"0", "sint64":"0", "uint32":"0",
-                     "uint64":"0", "string":"2", "bool":"0", "float":"5", "double":"1"]
+                     "uint64":"0", "string":"2", "bool":"0", "float":"5", "double":"1",
+                        "fixed32":"5"]
 
 int32Map ::= ["int32":"true"] 
 int64Map ::= ["int64":"true"]
@@ -50,6 +51,7 @@ sint32Map ::= ["sint32":"true"]
 sint64Map ::= ["sint64":"true"] 
 uint32Map ::= ["uint32":"true"] 
 uint64Map ::= ["uint64":"true"] 
+fixed32Map ::= ["fixed32":"true"] 
 stringMap ::= ["string":"true"] 
 boolMap ::= ["bool":"true"]
 floatMap ::= ["float":"true"]
@@ -456,6 +458,7 @@ case $element.tag$ :
     $readSInt64(element)$
     $readUInt32(element)$
     $readUInt64(element)$
+    $readFixed32(element)$
     $readFloat(element)$
     $readDouble(element)$
     $readBool(element)$
@@ -579,9 +582,9 @@ readUInt32(element) ::= <<
 $if(uint32Map.(element.typeName))$
 offset = read_raw_varint32(&tag, _buffer, offset);
 $if(arrayModifiers.(element.modifier))$
-_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (unsigned long)tag;
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = tag;
 $else$
-_$name$->_$element.name$ = (unsigned long)tag;
+_$name$->_$element.name$ = tag;
 $endif$
 $endif$
 >>
@@ -593,6 +596,17 @@ $if(arrayModifiers.(element.modifier))$
 _$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = value;
 $else$
 _$name$->_$element.name$ = value;
+$endif$
+$endif$
+>>
+
+readFixed32(element) ::= <<
+$if(fixed32Map.(element.typeName))$
+offset = read_raw_little_endian32(&tag, _buffer, offset);
+$if(arrayModifiers.(element.modifier))$
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = tag;
+$else$
+_$name$->_$element.name$ = tag;
 $endif$
 $endif$
 >>
@@ -609,6 +623,7 @@ $writeSInt32(element)$
 $writeSInt64(element)$
 $writeUInt32(element)$
 $writeUInt64(element)$
+$writeFixed32(element)$
 $writeString(element)$
 $writeBool(element)$
 $writeFloat(element)$
@@ -829,6 +844,25 @@ $endif$
 
 writeUInt64NoTag(element) ::= <<
 offset = write_raw_varint64(_$name$-\>_$element.name$, _buffer, offset);
+>>
+
+writeFixed32(element) ::= <<
+$if(fixed32Map.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    $writeTag(element)$
+    offset = write_raw_little_endian32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$else$
+$writeTag(element)$
+$writeFixed32NoTag(element)$
+$endif$
+$endif$
+>>
+
+writeFixed32NoTag(element) ::= <<
+offset = write_raw_little_endian32(_$name$-\>_$element.name$, _buffer, offset);
 >>
 
 writeTag(element) ::= <<
