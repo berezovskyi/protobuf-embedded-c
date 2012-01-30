@@ -362,13 +362,13 @@ public class TestWireFormat {
 							Person.Builder iniPersonBuilder = Person
 									.newBuilder();
 							iniPersonBuilder.setId(i);
-							if (i == Integer.MAX_VALUE) {
+							if (i >= Integer.MAX_VALUE) {
 								iniPersonBuilder.setId64(Long.MAX_VALUE);
 								iniPersonBuilder.setSid64(Long.MAX_VALUE);
 								iniPersonBuilder.setUid64(Long.MAX_VALUE);
 								iniPersonBuilder.setFid64(Long.MAX_VALUE);
 								iniPersonBuilder.setSfid64(Long.MAX_VALUE);
-							} else if (i == Integer.MIN_VALUE) {
+							} else if (i <= Integer.MIN_VALUE + 1) {
 								iniPersonBuilder.setId64(Long.MIN_VALUE);
 								iniPersonBuilder.setSid64(Long.MIN_VALUE);
 								iniPersonBuilder.setUid64(Long.MAX_VALUE);
