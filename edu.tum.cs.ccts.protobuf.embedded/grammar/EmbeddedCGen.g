@@ -50,8 +50,11 @@ proto [String filename]
 		if (repeatedLength == null) repeatedLength = 32;
 		Integer stringLength = annotationMap.get("max_string_length");
 		if (stringLength == null) stringLength = 32;
+		Integer bytesLength = annotationMap.get("max_bytes_length");
+		if (bytesLength == null) bytesLength = 32;
 		retval.st.setAttribute("max_repeated_length", repeatedLength);
 		retval.st.setAttribute("max_string_length", stringLength);
+		retval.st.setAttribute("max_bytes_length", bytesLength);
 	}
 	:	^(PROTO p+=packageDecl? (i+=importDecl)* (d+=declaration)*)
 			-> proto(packageDecl={$p}, importDecls={$i}, declarations={$d}, filename={$filename}) 
@@ -152,6 +155,10 @@ messageElement
          messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("bool")) {
          messageSize += repeatedLength * (2 + 1);
+	     } else if (type.equals("bytes")) {
+	       Integer bytesLength = annotationMap.get("max_bytes_length");
+         if (bytesLength == null) bytesLength = 32;
+         messageSize += repeatedLength * (2 + 1 + bytesLength);
        } else { 
          //enums
          messageSize += repeatedLength * (2 + 1);
