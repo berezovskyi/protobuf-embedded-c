@@ -105,6 +105,8 @@ int main () {
     	print_string(rperson[0]._name5_len, fw, rperson[0]._name5);
     	fprintf(fw, "name6=");
     	print_string(rperson[0]._name6_len, fw, rperson[0]._name6);
+    	fprintf(fw, "bname=");
+    	print_string(rperson[0]._bname_len, fw, rperson[0]._bname);
     	fprintf(fw, "iq=%f\n", rperson[0]._iq);
     	fprintf(fw, "iqd=%.10lf\n", rperson[0]._iqd);
     	fprintf(fw, "email=%d\n", rperson[0]._email);

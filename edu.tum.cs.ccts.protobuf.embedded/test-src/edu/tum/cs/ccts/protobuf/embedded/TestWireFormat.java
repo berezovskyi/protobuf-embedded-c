@@ -36,6 +36,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.google.protobuf.ByteString;
+
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.Person;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.Person.Builder;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.PhoneType;
@@ -97,10 +99,15 @@ public class TestWireFormat {
 			iniPersonBuilder.setName4(getRandomString(rand));
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
+			iniPersonBuilder.setBname(getRandomByteString(rand));
 
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addStrAttr(getRandomString(rand));
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addBAttr(getRandomByteString(rand));
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -195,10 +202,15 @@ public class TestWireFormat {
 			iniPersonBuilder.setName4(getRandomString(rand));
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
+			iniPersonBuilder.setBname(getRandomByteString(rand));
 
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addStrAttr(getRandomString(rand));
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addBAttr(getRandomByteString(rand));
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -291,6 +303,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setName4(getRandomString(rand));
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
+			iniPersonBuilder.setBname(getRandomByteString(rand));
 			lBuilder.add(iniPersonBuilder);
 		}
 		executeTest(lBuilder, 0);
@@ -322,6 +335,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setName4(getRandomString(rand));
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
+			iniPersonBuilder.setBname(getRandomByteString(rand));
 			List<Builder> lBuilder = new ArrayList<Builder>();
 			lBuilder.add(iniPersonBuilder);
 			executeTest(lBuilder, step);
@@ -402,6 +416,8 @@ public class TestWireFormat {
 							iniPersonBuilder.setName4(s2);
 							iniPersonBuilder.setName5(s);
 							iniPersonBuilder.setName6(s2);
+							iniPersonBuilder.setBname(ByteString.copyFrom(s
+									.getBytes("UTF-8")));
 							List<Builder> lBuilder = new ArrayList<Builder>();
 							lBuilder.add(iniPersonBuilder);
 							executeTest(lBuilder, step++);
@@ -494,6 +510,8 @@ public class TestWireFormat {
 							p.getProperty("name5"));
 					Assert.assertEquals(iniPerson.getName6(),
 							p.getProperty("name6"));
+					Assert.assertEquals(iniPerson.getBname().toStringUtf8(),
+							p.getProperty("bname"));
 				}
 			}
 		} catch (Throwable t) {
@@ -542,6 +560,18 @@ public class TestWireFormat {
 			name += (char) (rand.nextInt(26) + 64);
 		}
 		return name;
+	}
+
+	/**
+	 * Returns a random byte string.
+	 */
+	private ByteString getRandomByteString(Random rand) {
+		int size = rand.nextInt(33);
+		byte[] name = new byte[size];
+		for (int i = 0; i < size; ++i) {
+			name[i] += (rand.nextInt(26) + 100);
+		}
+		return ByteString.copyFrom(name);
 	}
 
 	/**
