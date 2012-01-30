@@ -84,94 +84,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setUid64(rand.nextLong());
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
-			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
-			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
-			iniPersonBuilder.setEmail(rand.nextBoolean());
-			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
-
-			iniPersonBuilder.setName1(getRandomString(rand));
-			iniPersonBuilder.setName2(getRandomString(rand));
-			iniPersonBuilder.setName3(getRandomString(rand));
-			iniPersonBuilder.setName4(getRandomString(rand));
-			iniPersonBuilder.setName5(getRandomString(rand));
-			iniPersonBuilder.setName6(getRandomString(rand));
-
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addStrAttr(getRandomString(rand));
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addFloatAttr(rand.nextFloat() * 20000 - 10000);
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder
-						.addDoubleAttr(rand.nextDouble() * 20000 - 10000);
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addIntAttr(rand.nextInt(32000) - 16000);
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addInt64Attr(rand.nextInt(32000));
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addSintAttr(rand.nextInt(32000) - 16000);
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addSintAttr64(rand.nextInt(32000));
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addUintAttr(rand.nextInt(32000));
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addUintAttr64(rand.nextLong());
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addFintAttr(rand.nextInt(32000));
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addFintAttr64(rand.nextLong());
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder.addBoolAttr(rand.nextBoolean());
-			}
-			repeatedNr = rand.nextInt(33);
-			for (int i = 0; i < repeatedNr; ++i) {
-				iniPersonBuilder
-						.addEnumAttr(PhoneType.valueOf(rand.nextInt(3) + 0));
-			}
-
-			lBuilder.add(iniPersonBuilder);
-		}
-		executeTest(lBuilder, 0);
-	}
-
-	@Test
-	public void testRepeatedInMessages() throws Exception {
-		Random rand = new Random(1989);
-		List<Builder> lBuilder = new ArrayList<Builder>();
-		int repeatedNr;
-		for (int step = 0; step < NUMBER_OF_TESTS; ++step) {
-			lBuilder.clear();
-			Person.Builder iniPersonBuilder = Person.newBuilder();
-			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
-			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
-			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
-			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
-			iniPersonBuilder.setUid(rand.nextInt(32000));
-			iniPersonBuilder.setUid64(rand.nextLong());
-			iniPersonBuilder.setFid32(rand.nextInt(32000));
-			iniPersonBuilder.setFid64(rand.nextLong());
+			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -231,6 +144,103 @@ public class TestWireFormat {
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSfintAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addBoolAttr(rand.nextBoolean());
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder
+						.addEnumAttr(PhoneType.valueOf(rand.nextInt(3) + 0));
+			}
+
+			lBuilder.add(iniPersonBuilder);
+		}
+		executeTest(lBuilder, 0);
+	}
+
+	@Test
+	public void testRepeatedInMessages() throws Exception {
+		Random rand = new Random(1989);
+		List<Builder> lBuilder = new ArrayList<Builder>();
+		int repeatedNr;
+		for (int step = 0; step < NUMBER_OF_TESTS; ++step) {
+			lBuilder.clear();
+			Person.Builder iniPersonBuilder = Person.newBuilder();
+			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setUid(rand.nextInt(32000));
+			iniPersonBuilder.setUid64(rand.nextLong());
+			iniPersonBuilder.setFid32(rand.nextInt(32000));
+			iniPersonBuilder.setFid64(rand.nextLong());
+			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
+			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
+			iniPersonBuilder.setEmail(rand.nextBoolean());
+			iniPersonBuilder.setPhone(PhoneType.valueOf(rand.nextInt(3) + 0));
+
+			iniPersonBuilder.setName1(getRandomString(rand));
+			iniPersonBuilder.setName2(getRandomString(rand));
+			iniPersonBuilder.setName3(getRandomString(rand));
+			iniPersonBuilder.setName4(getRandomString(rand));
+			iniPersonBuilder.setName5(getRandomString(rand));
+			iniPersonBuilder.setName6(getRandomString(rand));
+
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addStrAttr(getRandomString(rand));
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addFloatAttr(rand.nextFloat() * 20000 - 10000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder
+						.addDoubleAttr(rand.nextDouble() * 20000 - 10000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addIntAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addInt64Attr(rand.nextLong() - 10000000000L);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSintAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSintAttr64(rand.nextLong() - 10000000000L);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addUintAttr(rand.nextInt(32000));
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addUintAttr64(rand.nextLong());
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addFintAttr(rand.nextInt(32000));
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addFintAttr64(rand.nextLong());
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSfintAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addBoolAttr(rand.nextBoolean());
 			}
 			repeatedNr = rand.nextInt(33);
@@ -258,6 +268,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setUid64(rand.nextLong());
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
+			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -287,6 +298,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setUid64(rand.nextLong());
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
+			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -355,6 +367,7 @@ public class TestWireFormat {
 								iniPersonBuilder.setFid64(i);
 							}
 							iniPersonBuilder.setSid(i);
+							iniPersonBuilder.setSfid32(i);
 							if (i < 0) {
 								iniPersonBuilder.setUid(-i);
 								iniPersonBuilder.setFid32(-i);
@@ -442,6 +455,8 @@ public class TestWireFormat {
 							parseInt(p.getProperty("fid32")));
 					Assert.assertEquals(iniPerson.getFid64(),
 							parseLong(p.getProperty("fid64")));
+					Assert.assertEquals(iniPerson.getSfid32(),
+							parseInt(p.getProperty("sfid32")));
 					Assert.assertEquals(limitFloat(iniPerson.getIq()),
 							limitFloat(Float.parseFloat(p.getProperty("iq"))));
 					Assert.assertTrue(abs(iniPerson.getIqd()
