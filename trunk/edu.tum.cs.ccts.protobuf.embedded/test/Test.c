@@ -292,7 +292,7 @@ unsigned long Message_get_delimited_size(void *_buffer, int offset) {
 
 
 /*******************************************************************
- * Enum: Test.proto, line 10
+ * Enum: Test.proto, line 11
  *******************************************************************/
 int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offset, int tag) {
     /* Write tag.*/
@@ -304,7 +304,7 @@ int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offs
 }
 
 /*******************************************************************
- * Message: Test.proto, line 16
+ * Message: Test.proto, line 17
  *******************************************************************/
 int PhoneNumber_write(struct PhoneNumber *_PhoneNumber, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -385,7 +385,7 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
 
 
 /*******************************************************************
- * Message: Test.proto, line 21
+ * Message: Test.proto, line 22
  *******************************************************************/
 int Person_write(struct Person *_Person, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -412,6 +412,10 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     offset = write_raw_varint32((6<<3)+2, _buffer, offset);
     offset = write_raw_varint32(_Person->_name6_len, _buffer, offset);
     offset = write_raw_bytes(_Person->_name6, _Person->_name6_len, _buffer, offset);
+
+    offset = write_raw_varint32((36<<3)+2, _buffer, offset);
+    offset = write_raw_varint32(_Person->_bname_len, _buffer, offset);
+    offset = write_raw_bytes(_Person->_bname, _Person->_bname_len, _buffer, offset);
 
     offset = write_raw_varint32((7<<3)+0, _buffer, offset);
     if (_Person->_id >= 0)
@@ -463,6 +467,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_varint32((11<<3)+2, _buffer, offset);
         offset = write_raw_varint32(_Person->_strAttr_len[strAttr_cnt], _buffer, offset);
         offset = write_raw_bytes(_Person->_strAttr[strAttr_cnt], _Person->_strAttr_len[strAttr_cnt], _buffer, offset);
+    }
+
+    int bAttr_cnt;
+    for (bAttr_cnt = 0; bAttr_cnt < _Person->_bAttr_repeated_len; ++ bAttr_cnt) {
+        offset = write_raw_varint32((37<<3)+2, _buffer, offset);
+        offset = write_raw_varint32(_Person->_bAttr_len[bAttr_cnt], _buffer, offset);
+        offset = write_raw_bytes(_Person->_bAttr[bAttr_cnt], _Person->_bAttr_len[bAttr_cnt], _buffer, offset);
     }
 
     int intAttr_cnt;
@@ -644,6 +655,14 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name6 + i), _buffer, offset);
                 break;
+            //tag of: _Person._bname 
+            case 36 :
+                 /* Re-use 'tag' to store string length. */
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_bname_len = tag;
+                for(i = 0; i < tag; ++ i) 
+                    offset = read_raw_byte((_Person->_bname + i), _buffer, offset);
+                break;
             //tag of: _Person._id 
             case 7 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -728,6 +747,19 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 }
                 /* Advance to next string. */
                 _Person->_strAttr_repeated_len++;    
+                break;
+            //tag of: _Person._bAttr 
+            case 37 :
+                 /* Re-use 'tag' to store string length. */
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                /* Set length of current string. */
+                _Person->_bAttr_len[(int)_Person->_bAttr_repeated_len] = tag;
+                /* Copy raw bytes of current string. */
+                for(i = 0; i < tag; ++ i) {
+                    offset = read_raw_byte(&_Person->_bAttr[(int)_Person->_bAttr_repeated_len][i], _buffer, offset);
+                }
+                /* Advance to next string. */
+                _Person->_bAttr_repeated_len++;    
                 break;
             //tag of: _Person._intAttr 
             case 12 :
@@ -818,7 +850,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 59
+ * Message: Test.proto, line 62
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -895,7 +927,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 63
+ * Message: Test.proto, line 66
  *******************************************************************/
 int Foo_write(void *_buffer, int offset) {
     /* Write content of each message element.*/

@@ -6,6 +6,7 @@ option java_outer_classname="TestProtos";
 // Embedded C internal options.
 //@max_repeated_length=100
 //@max_string_length=32
+//@max_bytes_length=32
 
 enum PhoneType {
   MOBILE = 0;
@@ -25,6 +26,7 @@ message Person {
   required string name4 = 4;
   required string name5 = 5;
   required string name6= 6;
+  required bytes bname = 36;
   required int32 id = 7;
   required int64 id64 = 16;
   required sint32 sid = 20;
@@ -40,6 +42,7 @@ message Person {
   required bool email = 9;
   required PhoneType phone = 10;
   repeated string strAttr = 11;
+  repeated bytes bAttr = 37;
   repeated int32 intAttr = 12;
   repeated int64 int64Attr = 17;
   repeated sint32 sintAttr = 21;

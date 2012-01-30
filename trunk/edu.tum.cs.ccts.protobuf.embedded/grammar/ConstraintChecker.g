@@ -40,7 +40,7 @@ import java.util.Arrays;
 @members {
 private HashSet<String> nameScope = new HashSet<String>();
 private HashSet<Integer> valueScope = new HashSet<Integer>();
-String[] types = { "int32", "int64", "sint32", "sint64", "uint32", "uint64", "bool", 
+String[] types = { "int32", "int64", "sint32", "sint64", "uint32", "uint64", "bool", "bytes", 
                     "string", "float", "double", "fixed32", "fixed64", "sfixed32", "sfixed64" };
 private final HashSet<String> dataTypes = new HashSet<String>(Arrays.asList(types));
 private HashSet<String> globalNameScope = new HashSet<String>();
@@ -118,7 +118,7 @@ annotationDecl
 			if (!globalNameScope.isEmpty())
 				constraintError($ID.line, "cannot use annotations after message/enum declarations");
 			String name = $ID.text;
-			if (!name.equals("max_repeated_length") && !name.equals("max_string_length"))
+			if (!name.equals("max_repeated_length") && !name.equals("max_string_length") && !name.equals("max_bytes_length"))
 				constraintError($ID.line, "unknown annotation " + name);
 			if (annotations.contains(name))
 				constraintError($ID.line, "duplicate annotation " + name);
