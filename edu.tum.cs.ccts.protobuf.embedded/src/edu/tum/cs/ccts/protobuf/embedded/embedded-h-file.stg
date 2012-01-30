@@ -34,7 +34,7 @@ typeMap ::= [
   "sint32":"signed long",
   "sint64":"signed long long",
   "fixed32":"unsigned long",
-  "fixed64":"<UNSUPPORTED>",
+  "fixed64":"unsigned long long",
   "sfixed32":"signed long",
   "sfixed64":"<UNSUPPORTED>",
   "bool":"char",
