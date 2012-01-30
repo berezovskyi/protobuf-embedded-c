@@ -92,6 +92,7 @@ int main () {
     	fprintf(fw, "fid32=%ld\n", rperson[0]._fid32);
     	fprintf(fw, "fid64=%lld\n", rperson[0]._fid64);
     	fprintf(fw, "sfid32=%ld\n", rperson[0]._sfid32);
+    	fprintf(fw, "sfid64=%lld\n", rperson[0]._sfid64);
     	fprintf(fw, "name1=");
     	print_string(rperson[0]._name1_len, fw, rperson[0]._name1);
     	fprintf(fw, "name2=");

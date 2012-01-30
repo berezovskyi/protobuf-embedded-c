@@ -77,14 +77,15 @@ public class TestWireFormat {
 		for (int step = 0; step < NUMBER_OF_MULTIPLE_TESTS; ++step) {
 			Person.Builder iniPersonBuilder = Person.newBuilder();
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
-			iniPersonBuilder.setId64(rand.nextLong());
+			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
-			iniPersonBuilder.setSid64(rand.nextLong());
+			iniPersonBuilder.setSid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setUid(rand.nextInt(32000));
 			iniPersonBuilder.setUid64(rand.nextLong());
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
 			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setSfid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -145,6 +146,10 @@ public class TestWireFormat {
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addSfintAttr(rand.nextInt(32000) - 16000);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSfintAttr64(rand.nextLong() - 10000000000L);
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -178,6 +183,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
 			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setSfid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -241,6 +247,10 @@ public class TestWireFormat {
 			}
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
+				iniPersonBuilder.addSfintAttr64(rand.nextLong() - 10000000000L);
+			}
+			repeatedNr = rand.nextInt(33);
+			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addBoolAttr(rand.nextBoolean());
 			}
 			repeatedNr = rand.nextInt(33);
@@ -269,6 +279,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
 			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setSfid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -299,6 +310,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setFid32(rand.nextInt(32000));
 			iniPersonBuilder.setFid64(rand.nextLong());
 			iniPersonBuilder.setSfid32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setSfid64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setIq(rand.nextFloat() * 20000 - 10000);
 			iniPersonBuilder.setIqd(rand.nextDouble() * 20000 - 10000);
 			iniPersonBuilder.setEmail(rand.nextBoolean());
@@ -355,16 +367,19 @@ public class TestWireFormat {
 								iniPersonBuilder.setSid64(Long.MAX_VALUE);
 								iniPersonBuilder.setUid64(Long.MAX_VALUE);
 								iniPersonBuilder.setFid64(Long.MAX_VALUE);
+								iniPersonBuilder.setSfid64(Long.MAX_VALUE);
 							} else if (i == Integer.MIN_VALUE) {
 								iniPersonBuilder.setId64(Long.MIN_VALUE);
 								iniPersonBuilder.setSid64(Long.MIN_VALUE);
 								iniPersonBuilder.setUid64(Long.MAX_VALUE);
 								iniPersonBuilder.setFid64(Long.MAX_VALUE);
+								iniPersonBuilder.setSfid64(Long.MIN_VALUE);
 							} else {
 								iniPersonBuilder.setId64(i);
 								iniPersonBuilder.setSid64(i);
 								iniPersonBuilder.setUid64(i);
 								iniPersonBuilder.setFid64(i);
+								iniPersonBuilder.setSfid64(i);
 							}
 							iniPersonBuilder.setSid(i);
 							iniPersonBuilder.setSfid32(i);
@@ -457,6 +472,8 @@ public class TestWireFormat {
 							parseLong(p.getProperty("fid64")));
 					Assert.assertEquals(iniPerson.getSfid32(),
 							parseInt(p.getProperty("sfid32")));
+					Assert.assertEquals(iniPerson.getSfid64(),
+							parseLong(p.getProperty("sfid64")));
 					Assert.assertEquals(limitFloat(iniPerson.getIq()),
 							limitFloat(Float.parseFloat(p.getProperty("iq"))));
 					Assert.assertTrue(abs(iniPerson.getIqd()

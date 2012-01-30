@@ -34,6 +34,7 @@ message Person {
   required fixed32 fid32 = 28;
   required fixed64 fid64 = 30;
   required sfixed32 sfid32 = 32;
+  required sfixed64 sfid64 = 34;
   required float iq = 8;
   required double iqd = 18;
   required bool email = 9;
@@ -48,6 +49,7 @@ message Person {
   repeated fixed32 fintAttr = 29;
   repeated fixed64 fintAttr64 = 31;
   repeated sfixed32 sfintAttr = 33;
+  repeated sfixed64 sfintAttr64 = 35;
   repeated bool boolAttr = 13;
   repeated float floatAttr = 14;
   repeated double doubleAttr = 19;

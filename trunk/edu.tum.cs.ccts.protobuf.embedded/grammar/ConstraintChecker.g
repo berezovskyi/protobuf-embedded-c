@@ -41,7 +41,7 @@ import java.util.Arrays;
 private HashSet<String> nameScope = new HashSet<String>();
 private HashSet<Integer> valueScope = new HashSet<Integer>();
 String[] types = { "int32", "int64", "sint32", "sint64", "uint32", "uint64", "bool", 
-                    "string", "float", "double", "fixed32", "fixed64", "sfixed32" };
+                    "string", "float", "double", "fixed32", "fixed64", "sfixed32", "sfixed64" };
 private final HashSet<String> dataTypes = new HashSet<String>(Arrays.asList(types));
 private HashSet<String> globalNameScope = new HashSet<String>();
 public int constraintErrors = 0;
