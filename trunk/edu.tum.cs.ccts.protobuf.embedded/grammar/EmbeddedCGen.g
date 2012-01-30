@@ -142,6 +142,8 @@ messageElement
 	       messageSize += repeatedLength * (2 + 4);
 	     } else if (type.equals("fixed32")) {
 	       messageSize += repeatedLength * (2 + 4);
+	     } else if (type.equals("fixed64")) {
+	       messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("double")) {
          messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("bool")) {
