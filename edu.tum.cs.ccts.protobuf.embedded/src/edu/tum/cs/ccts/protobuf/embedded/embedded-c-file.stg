@@ -36,14 +36,14 @@ typeMap ::= [
   "fixed32":"unsigned long",
   "fixed64":"unsigned long long",
   "sfixed32":"signed long",
-  "sfixed64":"<UNSUPPORTED>",
+  "sfixed64":"signed long long",
   "bool":"char",
   "string":"char",
   "bytes":"char"]
  
 wireTypeMap ::= ["int32":"0", "int64":"0", "sint32":"0", "sint64":"0", "uint32":"0",
                      "uint64":"0", "string":"2", "bool":"0", "float":"5", "double":"1",
-                        "fixed32":"5", "fixed64":"1", "sfixed32":"5"]
+                        "fixed32":"5", "fixed64":"1", "sfixed32":"5", "sfixed64":"1"]
 
 int32Map ::= ["int32":"true"] 
 int64Map ::= ["int64":"true"]
@@ -54,6 +54,7 @@ uint64Map ::= ["uint64":"true"]
 fixed32Map ::= ["fixed32":"true"] 
 fixed64Map ::= ["fixed64":"true"] 
 sfixed32Map ::= ["sfixed32":"true"] 
+sfixed64Map ::= ["sfixed64":"true"] 
 stringMap ::= ["string":"true"] 
 boolMap ::= ["bool":"true"]
 floatMap ::= ["float":"true"]
@@ -463,6 +464,7 @@ case $element.tag$ :
     $readFixed32(element)$
     $readFixed64(element)$
     $readSFixed32(element)$
+    $readSFixed64(element)$
     $readFloat(element)$
     $readDouble(element)$
     $readBool(element)$
@@ -637,6 +639,17 @@ $endif$
 $endif$
 >>
 
+readSFixed64(element) ::= <<
+$if(sfixed64Map.(element.typeName))$
+offset = read_raw_little_endian64(&value, _buffer, offset);
+$if(arrayModifiers.(element.modifier))$
+_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = (signed long long)value;
+$else$
+_$name$->_$element.name$ = (signed long long)value;
+$endif$
+$endif$
+>>
+
 readTag() ::= <<
 offset = read_raw_varint32(&tag, _buffer, offset);
 tag = tag\>\>3;
@@ -652,6 +665,7 @@ $writeUInt64(element)$
 $writeFixed32(element)$
 $writeFixed64(element)$
 $writeSFixed32(element)$
+$writeSFixed64(element)$
 $writeString(element)$
 $writeBool(element)$
 $writeFloat(element)$
@@ -929,6 +943,25 @@ $endif$
 
 writeSFixed32NoTag(element) ::= <<
 offset = write_raw_little_endian32(_$name$-\>_$element.name$, _buffer, offset);
+>>
+
+writeSFixed64(element) ::= <<
+$if(sfixed64Map.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    $writeTag(element)$
+    offset = write_raw_little_endian64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$else$
+$writeTag(element)$
+$writeSFixed64NoTag(element)$
+$endif$
+$endif$
+>>
+
+writeSFixed64NoTag(element) ::= <<
+offset = write_raw_little_endian64(_$name$-\>_$element.name$, _buffer, offset);
 >>
 
 
