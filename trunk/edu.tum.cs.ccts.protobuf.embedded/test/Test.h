@@ -89,9 +89,11 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
 
 /* Structure that holds a deserialized AddressBook-message. */
 
-
-typedef struct AddressBook AddressBook;
-
+struct AddressBook {
+  int _address_len;
+  char _address[MAX_STRING_LEN];
+  signed long _number;
+};
 
 /* Structure that holds a deserialized Person-message. */
 struct Person {
@@ -159,12 +161,6 @@ struct Person {
   int _enumAttr_repeated_len;
   enum PhoneType _enumAttr[MAX_REPEATED_LEN];
 };
-
-struct AddressBook {
-	  int _address_len;
-	  char _address[MAX_STRING_LEN];
-	  signed long _number;
-	};
 
 /*
  * Serialize a Person-message into the given buffer at offset and return
