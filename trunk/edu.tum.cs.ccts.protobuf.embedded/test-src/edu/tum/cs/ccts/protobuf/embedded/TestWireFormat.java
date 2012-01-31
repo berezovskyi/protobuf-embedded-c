@@ -38,6 +38,7 @@ import org.junit.Test;
 
 import com.google.protobuf.ByteString;
 
+import edu.tum.cs.ccts.protobuf.embedded.TestProtos.AddressBook;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.Person;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.Person.Builder;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.PhoneType;
@@ -77,7 +78,12 @@ public class TestWireFormat {
 		List<Builder> lBuilder = new ArrayList<Builder>();
 		int repeatedNr;
 		for (int step = 0; step < NUMBER_OF_MULTIPLE_TESTS; ++step) {
+			AddressBook.Builder address = AddressBook.newBuilder();
+			address.setAddress(getRandomString(rand));
+			address.setNumber(rand.nextInt(32000) - 16000);
+
 			Person.Builder iniPersonBuilder = Person.newBuilder();
+			iniPersonBuilder.setAb(address);
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
@@ -180,7 +186,12 @@ public class TestWireFormat {
 		int repeatedNr;
 		for (int step = 0; step < NUMBER_OF_TESTS; ++step) {
 			lBuilder.clear();
+			AddressBook.Builder address = AddressBook.newBuilder();
+			address.setAddress(getRandomString(rand));
+			address.setNumber(rand.nextInt(32000) - 16000);
+
 			Person.Builder iniPersonBuilder = Person.newBuilder();
+			iniPersonBuilder.setAb(address);
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
@@ -281,7 +292,12 @@ public class TestWireFormat {
 		Random rand = new Random(1989);
 		List<Builder> lBuilder = new ArrayList<Builder>();
 		for (int step = 0; step < NUMBER_OF_MULTIPLE_TESTS; ++step) {
+			AddressBook.Builder address = AddressBook.newBuilder();
+			address.setAddress(getRandomString(rand));
+			address.setNumber(rand.nextInt(32000) - 16000);
+
 			Person.Builder iniPersonBuilder = Person.newBuilder();
+			iniPersonBuilder.setAb(address);
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
@@ -313,7 +329,12 @@ public class TestWireFormat {
 	public void testRandomInTheLoop() throws Exception {
 		Random rand = new Random(1989);
 		for (int step = 0; step < NUMBER_OF_TESTS; ++step) {
+			AddressBook.Builder address = AddressBook.newBuilder();
+			address.setAddress(getRandomString(rand));
+			address.setNumber(rand.nextInt(32000) - 16000);
+
 			Person.Builder iniPersonBuilder = Person.newBuilder();
+			iniPersonBuilder.setAb(address);
 			iniPersonBuilder.setId(rand.nextInt(32000) - 16000);
 			iniPersonBuilder.setId64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setSid(rand.nextInt(32000) - 16000);
@@ -345,6 +366,9 @@ public class TestWireFormat {
 	@Test
 	public void testEquivalenceClassesLoop() throws FileNotFoundException,
 			IOException {
+		AddressBook.Builder address = AddressBook.newBuilder();
+		address.setAddress("abcdefgh0123");
+
 		List<String> stringClasses = new ArrayList<String>();
 		stringClasses.add("");
 		stringClasses.add("Hello");
@@ -375,6 +399,8 @@ public class TestWireFormat {
 						for (Boolean b : boolClasses) {
 							Person.Builder iniPersonBuilder = Person
 									.newBuilder();
+							address.setNumber(i);
+							iniPersonBuilder.setAb(address);
 							iniPersonBuilder.setId(i);
 							if (i >= Integer.MAX_VALUE) {
 								iniPersonBuilder.setId64(Long.MAX_VALUE);
@@ -510,6 +536,10 @@ public class TestWireFormat {
 							p.getProperty("name5"));
 					Assert.assertEquals(iniPerson.getName6(),
 							p.getProperty("name6"));
+					Assert.assertEquals(iniPerson.getAb().getAddress(),
+							p.getProperty("abaddress"));
+					Assert.assertEquals(iniPerson.getAb().getNumber(),
+							parseInt(p.getProperty("abnumber")));
 					Assert.assertEquals(iniPerson.getBname().toStringUtf8(),
 							p.getProperty("bname"));
 				}

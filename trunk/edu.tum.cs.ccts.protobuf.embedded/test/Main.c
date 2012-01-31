@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 char _buffer[1024*1024];
+struct Person rperson[101];
 
 void print_string(int str_len, FILE *fw, char str[]) {
 	int i;
@@ -41,7 +42,6 @@ int main () {
 	int pos, shift = 0;
 	char c;
 	int size, tmp, cnt = 0;
-	struct Person rperson[101];
 
 	FILE *finr = fopen ("Test.in", "rb");
 
@@ -107,6 +107,10 @@ int main () {
     	print_string(rperson[0]._name6_len, fw, rperson[0]._name6);
     	fprintf(fw, "bname=");
     	print_string(rperson[0]._bname_len, fw, rperson[0]._bname);
+    	fprintf(fw, "abaddress=");
+    	struct AddressBook ab = rperson[0]._ab;
+    	print_string(ab._address_len, fw, ab._address);
+    	fprintf(fw, "abnumber=%ld\n", ab._number);
     	fprintf(fw, "iq=%f\n", rperson[0]._iq);
     	fprintf(fw, "iqd=%.10lf\n", rperson[0]._iqd);
     	fprintf(fw, "email=%d\n", rperson[0]._email);

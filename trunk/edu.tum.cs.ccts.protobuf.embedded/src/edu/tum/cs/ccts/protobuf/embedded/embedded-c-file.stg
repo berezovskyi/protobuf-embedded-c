@@ -60,6 +60,8 @@ boolMap ::= ["bool":"true"]
 bytesMap ::= ["bytes":"true"]
 floatMap ::= ["float":"true"]
 doubleMap ::= ["double":"true"]
+enumMap ::= ["enum":"true"]
+messageMap ::= ["message":"true"]
 
 arrayTypes ::= ["string":"true", "bytes":"true"]
 fixedSizeMap ::= ["double":"8", "float":"4", "fixed64":"8", "fixed32":"4", "sfixed64":"8", "sfixed32":"4", "bool":"1"]
@@ -400,7 +402,7 @@ int $name$_write_with_tag($if(empty)$$else$struct $name$ *_$name$, $endif$void *
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = $name$_write($if(empty)$$else$_$name$, $endif$_buffer, offset);
+    offset = $name$_write_delimited_to($if(empty)$$else$_$name$, $endif$_buffer, offset);
     
     return offset;
 }
@@ -472,6 +474,7 @@ case $element.tag$ :
     $readEnum(element)$
     $readString(element)$
     $readBytes(element)$
+    $readMessage(element)$
     break;
 >>
 
@@ -529,12 +532,23 @@ $endif$
 >>
 
 readEnum(element) ::= <<
-$if(!typeMap.(element.typeName))$
+$if(enumMap.(element.typeClass))$
 offset = read_raw_varint32(&tag, _buffer, offset);
 $if(arrayModifiers.(element.modifier))$
 _$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++] = tag;
 $else$
 _$name$->_$element.name$ = tag;
+$endif$
+$endif$
+>>
+
+readMessage(element) ::= <<
+$if(!enumMap.(element.typeClass))$$if(!typeMap.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+offset = $element.typeName$_read_delimited_from(_buffer, &_$name$->_$element.name$[(int)_$name$->_$element.name$_repeated_len++], offset);
+$else$
+offset = $element.typeName$_read_delimited_from(_buffer, &_$name$->_$element.name$, offset);
+$endif$
 $endif$
 $endif$
 >>

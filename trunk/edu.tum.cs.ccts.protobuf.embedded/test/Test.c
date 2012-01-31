@@ -321,7 +321,7 @@ int PhoneNumber_write_with_tag(struct PhoneNumber *_PhoneNumber, void *_buffer, 
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = PhoneNumber_write(_PhoneNumber, _buffer, offset);
+    offset = PhoneNumber_write_delimited_to(_PhoneNumber, _buffer, offset);
     
     return offset;
 }
@@ -389,6 +389,7 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
  *******************************************************************/
 int Person_write(struct Person *_Person, void *_buffer, int offset) {
     /* Write content of each message element.*/
+    offset = AddressBook_write_with_tag(&_Person->_ab, _buffer, offset, 38);
     offset = write_raw_varint32((1<<3)+2, _buffer, offset);
     offset = write_raw_varint32(_Person->_name1_len, _buffer, offset);
     offset = write_raw_bytes(_Person->_name1, _Person->_name1_len, _buffer, offset);
@@ -571,7 +572,7 @@ int Person_write_with_tag(struct Person *_Person, void *_buffer, int offset, int
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = Person_write(_Person, _buffer, offset);
+    offset = Person_write_delimited_to(_Person, _buffer, offset);
     
     return offset;
 }
@@ -607,6 +608,10 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
+            //tag of: _Person._ab 
+            case 38 :
+                offset = AddressBook_read_delimited_from(_buffer, &_Person->_ab, offset);
+                break;
             //tag of: _Person._name1 
             case 1 :
                  /* Re-use 'tag' to store string length. */
@@ -850,13 +855,19 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 62
+ * Message: Test.proto, line 63
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = write_raw_varint32((1<<3)+2, _buffer, offset);
     offset = write_raw_varint32(_AddressBook->_address_len, _buffer, offset);
     offset = write_raw_bytes(_AddressBook->_address, _AddressBook->_address_len, _buffer, offset);
+
+    offset = write_raw_varint32((2<<3)+0, _buffer, offset);
+    if (_AddressBook->_number >= 0)
+        offset = write_raw_varint32(_AddressBook->_number, _buffer, offset);
+    else
+        offset = write_raw_varint64(_AddressBook->_number, _buffer, offset);
 
     
     return offset;
@@ -866,7 +877,7 @@ int AddressBook_write_with_tag(struct AddressBook *_AddressBook, void *_buffer, 
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = AddressBook_write(_AddressBook, _buffer, offset);
+    offset = AddressBook_write_delimited_to(_AddressBook, _buffer, offset);
     
     return offset;
 }
@@ -910,6 +921,11 @@ int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_AddressBook->_address + i), _buffer, offset);
                 break;
+            //tag of: _AddressBook._number 
+            case 2 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _AddressBook->_number = (signed long)tag;
+                break;
         }
     }
     
@@ -927,7 +943,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 66
+ * Message: Test.proto, line 68
  *******************************************************************/
 int Foo_write(void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -939,7 +955,7 @@ int Foo_write_with_tag(void *_buffer, int offset, int tag) {
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = Foo_write(_buffer, offset);
+    offset = Foo_write_delimited_to(_buffer, offset);
     
     return offset;
 }
