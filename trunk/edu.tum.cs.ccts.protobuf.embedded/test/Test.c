@@ -347,7 +347,6 @@ void PhoneNumber_clear(struct PhoneNumber *_PhoneNumber) {
 int PhoneNumber_read(void *_buffer, struct PhoneNumber *_PhoneNumber, int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
-    unsigned long long value = i;
 
 /* Reset all attributes to 0 in advance. */
     PhoneNumber_clear(_PhoneNumber);
@@ -598,7 +597,7 @@ void Person_clear(struct Person *_Person) {
 int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
-    unsigned long long value = i;
+unsigned long long value = i;
 
 /* Reset all attributes to 0 in advance. */
     Person_clear(_Person);
@@ -903,7 +902,6 @@ void AddressBook_clear(struct AddressBook *_AddressBook) {
 int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
-    unsigned long long value = i;
 
 /* Reset all attributes to 0 in advance. */
     AddressBook_clear(_AddressBook);
@@ -978,7 +976,6 @@ int Foo_write_delimited_to(void *_buffer, int offset) {
 int Foo_read(void *_buffer, int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
-    unsigned long long value = i;
 
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */

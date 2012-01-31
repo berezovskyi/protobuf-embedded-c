@@ -387,7 +387,7 @@ int $name$_write_with_tag(enum $name$ *_$name$, void *_buffer, int offset, int t
 
 enumElement(name, value) ::= <<>>
 
-messageDecl(name, elements, filename, line, maxsize, empty) ::= <<
+messageDecl(name, elements, filename, line, maxsize, empty, bigvalues) ::= <<
 /*******************************************************************
  * Message: $filename$.proto, line $line$
  *******************************************************************/
@@ -428,7 +428,7 @@ $if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
 int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
-    unsigned long long value = i;
+    $if(bigvalues)$unsigned long long value = i;$endif$
 
     $if(empty)$$else$/* Reset all attributes to 0 in advance. */
     $name$_clear(_$name$);$endif$

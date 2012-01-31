@@ -112,7 +112,7 @@ enumElement(name, value) ::= <<
 _$name$ = $value$
 >>
  
-messageDecl(name, elements, filename, line, maxsize, empty) ::= <<
+messageDecl(name, elements, filename, line, maxsize, empty, bigvalues) ::= <<
 /*******************************************************************
  * Message: $filename$.proto, line $line$
  *******************************************************************/

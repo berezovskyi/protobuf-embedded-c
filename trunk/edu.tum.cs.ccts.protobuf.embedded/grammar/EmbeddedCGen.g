@@ -41,6 +41,7 @@ HashMap<String, String> typeMap = new HashMap<String, String>();
 HashMap<String, Integer> annotationMap = new HashMap<String, Integer>();
 int messageSize;
 int elementCount;
+int bigValues;
 }
 
 proto [String filename]
@@ -96,10 +97,12 @@ messageDecl
   @init { 
           messageSize = 2; /* 2 bytes length for (write|read)delimited. */
           elementCount = 0; /* initialisation of number of elements. */ 
+          bigValues = 0;
         }
   @after { 
            retval.st.setAttribute("maxsize", messageSize);
            retval.st.setAttribute("empty", elementCount <= 0 ? Boolean.TRUE : Boolean.FALSE);
+           retval.st.setAttribute("bigvalues", bigValues > 0 ? Boolean.TRUE : Boolean.FALSE);
          }
 	:	^(MESSAGE ID (e+=messageElement)*)
 		{typeMap.put($ID.text, "message");}
@@ -131,14 +134,17 @@ messageElement
 	     if (type.equals("int32")) {
 	       messageSize += repeatedLength * (2 + 10);
 	     } else if (type.equals("int64")) {
+	       ++ bigValues;
          messageSize += repeatedLength * (2 + 10);
        } else if (type.equals("sint32")) {
          messageSize += repeatedLength * (2 + 5);
        } else if (type.equals("sint64")) {
+         ++ bigValues;
          messageSize += repeatedLength * (2 + 10);
        } else if (type.equals("uint32")) {
          messageSize += repeatedLength * (2 + 5);
        } else if (type.equals("uint64")) {
+         ++ bigValues;
          messageSize += repeatedLength * (2 + 10);
        } else if (type.equals("string")) {
 	       Integer stringLength = annotationMap.get("max_string_length");
@@ -149,12 +155,15 @@ messageElement
 	     } else if (type.equals("fixed32")) {
 	       messageSize += repeatedLength * (2 + 4);
 	     } else if (type.equals("fixed64")) {
+	       ++ bigValues;
 	       messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("sfixed32")) {
 	       messageSize += repeatedLength * (2 + 4);
 	     } else if (type.equals("sfixed64")) {
+	       ++ bigValues;
 	       messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("double")) {
+	       ++ bigValues;
          messageSize += repeatedLength * (2 + 8);
 	     } else if (type.equals("bool")) {
          messageSize += repeatedLength * (2 + 1);
