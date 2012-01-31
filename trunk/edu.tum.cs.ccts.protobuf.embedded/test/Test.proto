@@ -65,5 +65,15 @@ message AddressBook {
   required int32 number = 2;
 }
 
-message Foo {
+message C {
+	required B b = 1;
 }
+
+message B {
+	required int32 i = 1;
+}
+
+message A{
+	required B b = 1;
+}
+

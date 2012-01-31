@@ -33,19 +33,22 @@ options {
 
 @header {
 package edu.tum.cs.ccts.protobuf.embedded;
+
+import java.util.Collections;
 }
 
 @members {
 String filename;
 HashMap<String, String> typeMap = new HashMap<String, String>();
 HashMap<String, Integer> annotationMap = new HashMap<String, Integer>();
+HashMap<String, Integer> topologicalOrder;
 int messageSize;
 int elementCount;
 int bigValues;
 }
 
-proto [String filename]
-	@init { this.filename = filename; }
+proto [String filename, HashMap<String, Integer> topologicalOrder]
+	@init { this.filename = filename; this.topologicalOrder = topologicalOrder;}
 	@after {
 		Integer repeatedLength = annotationMap.get("max_repeated_length");
 		if (repeatedLength == null) repeatedLength = 32;
@@ -58,6 +61,9 @@ proto [String filename]
 		retval.st.setAttribute("max_bytes_length", bytesLength);
 	}
 	:	^(PROTO p+=packageDecl? (i+=importDecl)* (d+=declaration)*)
+			{ 
+			Collections.sort(list_d, new TemplateOrderComparator(topologicalOrder, false));
+      }
 			-> proto(packageDecl={$p}, importDecls={$i}, declarations={$d}, filename={$filename}) 
 	;
                 

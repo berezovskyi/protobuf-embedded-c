@@ -34,6 +34,7 @@ options {
 package edu.tum.cs.ccts.protobuf.embedded;
 
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Arrays;
 }
 
@@ -50,6 +51,7 @@ protected void constraintError(int line, String msg) {
   constraintErrors++;
 }
 private HashSet<String> annotations = new HashSet<String>();
+public HashMap<String, Integer> topologicalOrder = new HashMap<String, Integer>();
 
 }
 
@@ -103,12 +105,17 @@ enumElement
 	;
 
 messageDecl
-  @init { nameScope.clear(); valueScope.clear(); }
-	:	^(MESSAGE ID messageElement*)
+  scope {
+    String name;
+  }
+  @init { nameScope.clear(); valueScope.clear();}
+	:	^(MESSAGE ID {$messageDecl::name=$ID.text;} messageElement*)
 		{
 		  if (globalNameScope.contains($ID.text))
         constraintError($ID.line, "duplicate message name " + $ID.text);
       globalNameScope.add($ID.text);
+      if (!topologicalOrder.containsKey($ID.text))
+        topologicalOrder.put($ID.text, 0);
 		}
 	;
 
@@ -145,8 +152,18 @@ messageElement
 	     if (valueScope.contains(tag))
          constraintError($INTEGER.line, "duplicate tag value " + tag);
        valueScope.add(tag);
-       if (!dataTypes.contains($t.text) && globalNameScope.contains($t.text))
-         constraintError($t.line, "unsupported data type: " + $t.text + "\nData types must be natives, enums or embedded messages");
+       //if (!dataTypes.contains($t.text) && globalNameScope.contains($t.text))
+         //constraintError($t.line, "unsupported data type: " + $t.text + "\nData types must be natives, enums or embedded messages");
+       if (!dataTypes.contains($t.text)) {
+         Integer elementOrder = topologicalOrder.get($t.text);
+         if (elementOrder == null)
+           elementOrder = 0;
+         Integer messageOrder = topologicalOrder.get($messageDecl::name);
+         if (messageOrder == null)
+           messageOrder = 0;
+         elementOrder = Math.max(elementOrder, messageOrder + 1);
+         topologicalOrder.put($t.text, elementOrder);
+       }
 	   }
 	;
 
