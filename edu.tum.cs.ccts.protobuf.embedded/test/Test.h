@@ -88,7 +88,6 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
 #define MAX_Person_SIZE 18966
 
 /* Structure that holds a deserialized AddressBook-message. */
-
 struct AddressBook {
   int _address_len;
   char _address[MAX_STRING_LEN];
@@ -161,7 +160,6 @@ struct Person {
   int _enumAttr_repeated_len;
   enum PhoneType _enumAttr[MAX_REPEATED_LEN];
 };
-
 /*
  * Serialize a Person-message into the given buffer at offset and return
  * new offset for optional next message.
@@ -190,6 +188,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
 #define MAX_AddressBook_SIZE 49
+
 
 /*
  * Serialize a AddressBook-message into the given buffer at offset and return
