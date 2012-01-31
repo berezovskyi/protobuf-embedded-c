@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -46,7 +47,7 @@ import org.antlr.stringtemplate.language.DefaultTemplateLexer;
  */
 public class Protoc {
 
-	public static final String VERSION = "0.2 (2011-###-##)";
+	public static final String VERSION = "0.2 (2012-01-31)";
 
 	private static boolean debug = false;
 
@@ -125,13 +126,14 @@ public class Protoc {
 			name = name.substring(0, name.lastIndexOf("."));
 		}
 		generate("embedded-h-file.stg", new File(outputDirectory, name + ".h"),
-				tokens, tree, name);
+				tokens, tree, name, checker.topologicalOrder);
 		generate("embedded-c-file.stg", new File(outputDirectory, name + ".c"),
-				tokens, tree, name);
+				tokens, tree, name, checker.topologicalOrder);
 	}
 
 	private static void generate(String templateFilename, File outFile,
-			CommonTokenStream tokens, CommonTree tree, String protoFilename)
+			CommonTokenStream tokens, CommonTree tree, String protoFilename,
+			HashMap<String, Integer> topologicalOrder)
 			throws FileNotFoundException, IOException, RecognitionException {
 		// Load string template group file.
 		final InputStream in = Protoc.class
@@ -144,7 +146,8 @@ public class Protoc {
 		nodes.setTokenStream(tokens);
 		final EmbeddedCGen walker = new EmbeddedCGen(nodes);
 		walker.setTemplateLib(templates);
-		EmbeddedCGen.proto_return proto = walker.proto(protoFilename);
+		EmbeddedCGen.proto_return proto = walker.proto(protoFilename,
+				topologicalOrder);
 		// Emit File.
 		final String result = proto.getTemplate().toString();
 		if (debug) {
