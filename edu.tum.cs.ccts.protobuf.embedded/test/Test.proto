@@ -20,6 +20,7 @@ message PhoneNumber {
 }
 
 message Person {
+  required AddressBook ab = 38;
   required string name1 = 1;
   required string name2 = 2;
   required string name3 = 3;
@@ -61,6 +62,7 @@ message Person {
 
 message AddressBook {
   required string address = 1;
+  required int32 number = 2;
 }
 
 message Foo {

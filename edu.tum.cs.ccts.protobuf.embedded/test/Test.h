@@ -65,6 +65,13 @@ struct PhoneNumber {
 int PhoneNumber_write_delimited_to(struct PhoneNumber *_PhoneNumber, void *_buffer, int offset);
 
 /*
+ * Serialize a PhoneNumber-message together with its tag into the given buffer 
+ * at offset and return new offset for optional next message.
+ * Is useful if a PhoneNumber-message is embedded in another message.
+ */
+int PhoneNumber_write_with_tag(struct PhoneNumber *_PhoneNumber, void *_buffer, int offset, int tag);
+
+/*
  * Deserialize a PhoneNumber-message from the given buffer at offset and return
  * new offset for optional next message.
  *
@@ -78,10 +85,17 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
  *******************************************************************/
 
 /* Maximum size of a serialized Person-message, useful for buffer allocation. */
-#define MAX_Person_SIZE 18963
+#define MAX_Person_SIZE 18966
+
+/* Structure that holds a deserialized AddressBook-message. */
+
+
+typedef struct AddressBook AddressBook;
+
 
 /* Structure that holds a deserialized Person-message. */
 struct Person {
+  struct AddressBook _ab;
   int _name1_len;
   char _name1[MAX_STRING_LEN];
   int _name2_len;
@@ -145,11 +159,25 @@ struct Person {
   int _enumAttr_repeated_len;
   enum PhoneType _enumAttr[MAX_REPEATED_LEN];
 };
+
+struct AddressBook {
+	  int _address_len;
+	  char _address[MAX_STRING_LEN];
+	  signed long _number;
+	};
+
 /*
  * Serialize a Person-message into the given buffer at offset and return
  * new offset for optional next message.
  */
 int Person_write_delimited_to(struct Person *_Person, void *_buffer, int offset);
+
+/*
+ * Serialize a Person-message together with its tag into the given buffer 
+ * at offset and return new offset for optional next message.
+ * Is useful if a Person-message is embedded in another message.
+ */
+int Person_write_with_tag(struct Person *_Person, void *_buffer, int offset, int tag);
 
 /*
  * Deserialize a Person-message from the given buffer at offset and return
@@ -161,22 +189,24 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 62
+ * Message: Test.proto, line 63
  *******************************************************************/
 
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
-#define MAX_AddressBook_SIZE 37
+#define MAX_AddressBook_SIZE 49
 
-/* Structure that holds a deserialized AddressBook-message. */
-struct AddressBook {
-  int _address_len;
-  char _address[MAX_STRING_LEN];
-};
 /*
  * Serialize a AddressBook-message into the given buffer at offset and return
  * new offset for optional next message.
  */
 int AddressBook_write_delimited_to(struct AddressBook *_AddressBook, void *_buffer, int offset);
+
+/*
+ * Serialize a AddressBook-message together with its tag into the given buffer 
+ * at offset and return new offset for optional next message.
+ * Is useful if a AddressBook-message is embedded in another message.
+ */
+int AddressBook_write_with_tag(struct AddressBook *_AddressBook, void *_buffer, int offset, int tag);
 
 /*
  * Deserialize a AddressBook-message from the given buffer at offset and return
@@ -188,7 +218,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 66
+ * Message: Test.proto, line 68
  *******************************************************************/
 
 /* Maximum size of a serialized Foo-message, useful for buffer allocation. */
@@ -199,6 +229,13 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
  * new offset for optional next message.
  */
 int Foo_write_delimited_to(void *_buffer, int offset);
+
+/*
+ * Serialize a Foo-message together with its tag into the given buffer 
+ * at offset and return new offset for optional next message.
+ * Is useful if a Foo-message is embedded in another message.
+ */
+int Foo_write_with_tag(void *_buffer, int offset, int tag);
 
 /*
  * Deserialize a Foo-message from the given buffer at offset and return

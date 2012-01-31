@@ -145,8 +145,8 @@ messageElement
 	     if (valueScope.contains(tag))
          constraintError($INTEGER.line, "duplicate tag value " + tag);
        valueScope.add(tag);
-       if (!dataTypes.contains($t.text))
-         constraintError($t.line, "unsupported data type: " + $t.text + "\nData types must be natives or enums ");
+       if (!dataTypes.contains($t.text) && globalNameScope.contains($t.text))
+         constraintError($t.line, "unsupported data type: " + $t.text + "\nData types must be natives, enums or embedded messages");
 	   }
 	;
 

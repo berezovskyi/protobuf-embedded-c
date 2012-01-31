@@ -41,7 +41,8 @@ typeMap ::= [
   "string":"char",
   "bytes":"char"]
 
-messageTypeMap ::= ["enum":"enum", "message":"struct"]
+enumTypeMap ::= ["enum":"enum"]
+messageTypeMap ::= ["message":"struct"]
 arrayTypes ::= ["string":"true", "bytes":"true"]  
 arraySTypes ::= ["string":"true"]
 arrayBTypes ::= ["bytes":"true"]
@@ -133,6 +134,13 @@ $endif$
 int $name$_write_delimited_to($if(empty)$$else$struct $name$ *_$name$, $endif$void *_buffer, int offset);
 
 /*
+ * Serialize a $name$-message together with its tag into the given buffer 
+ * at offset and return new offset for optional next message.
+ * Is useful if a $name$-message is embedded in another message.
+ */
+int $name$_write_with_tag($if(empty)$$else$struct $name$ *_$name$, $endif$void *_buffer, int offset, int tag);
+
+/*
  * Deserialize a $name$-message from the given buffer at offset and return
  * new offset for optional next message.
  *
@@ -146,8 +154,7 @@ messageAttribute(modifier, typeName, typeClass, name, tag) ::= <<
 $if(arrayModifiers.(modifier))$int _$name$_repeated_len;$endif$
 $if(arrayTypes.(typeName))$$if(arrayModifiers.(modifier))$int _$name$_len[MAX_REPEATED_LEN];
 $else$int _$name$_len;$endif$$endif$
-$if(typeMap.(typeName))$$typeMap.(typeName)$
-$else$$messageTypeMap.(typeClass)$ $typeName$
+$if(typeMap.(typeName))$$typeMap.(typeName)$$elseif(enumTypeMap.(typeClass))$enum $typeName$$else$struct $typeName$
 $endif$ _$name$$if(arrayModifiers.(modifier))$[MAX_REPEATED_LEN]
 $endif$$if(arraySTypes.(typeName))$[MAX_STRING_LEN]
 $endif$$if(arrayBTypes.(typeName))$[MAX_BYTES_LEN]

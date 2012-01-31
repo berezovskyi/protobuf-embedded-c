@@ -103,7 +103,10 @@ messageDecl
          }
 	:	^(MESSAGE ID (e+=messageElement)*)
 		{typeMap.put($ID.text, "message");}
-			-> messageDecl(name={$ID.text}, elements={$e}, filename={filename}, line={$MESSAGE.line})
+			-> messageDecl(name={$ID.text}, 
+			               elements={$e}, 
+			               filename={filename}, 
+			               line={$MESSAGE.line})
 	;
 	
 annotationDecl
@@ -159,8 +162,11 @@ messageElement
 	       Integer bytesLength = annotationMap.get("max_bytes_length");
          if (bytesLength == null) bytesLength = 32;
          messageSize += repeatedLength * (2 + 1 + bytesLength);
-       } else { 
-         //enums
+       } else if (type.equals("enum")){ 
+         messageSize += repeatedLength * (2 + 1);
+       } else {
+         //embedded messages
+         //TODO: compute the maximum length of the message
          messageSize += repeatedLength * (2 + 1);
        }
 	   }
