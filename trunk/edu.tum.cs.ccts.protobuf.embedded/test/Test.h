@@ -189,7 +189,6 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
 #define MAX_AddressBook_SIZE 49
 
-
 /*
  * Serialize a AddressBook-message into the given buffer at offset and return
  * new offset for optional next message.
