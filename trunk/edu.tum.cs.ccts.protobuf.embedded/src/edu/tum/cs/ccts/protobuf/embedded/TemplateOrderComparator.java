@@ -25,11 +25,13 @@ public class TemplateOrderComparator implements Comparator {
 		if (st1 != null && st2 != null) {
 			Integer i1 = order.get(st1.getAttribute("name"));
 			if (i1 == null) {
-				i1 = 0;
+				// at the beginning of the file
+				i1 = Integer.MAX_VALUE;
 			}
 			Integer i2 = order.get(st2.getAttribute("name"));
 			if (i2 == null) {
-				i2 = 0;
+				// at the beginning of the file
+				i2 = Integer.MAX_VALUE;
 			}
 			if (!ascending) {
 				return i2 - i1;

@@ -38,6 +38,15 @@ int Message_can_read_delimited_from(void *_buffer, int offset, int length);
 
 
 /*******************************************************************
+ * Enumeration: Test.proto, line 11
+ *******************************************************************/
+enum PhoneType {
+  _MOBILE = 0,
+  _HOME = 1,
+  _WORK = 2
+};
+
+/*******************************************************************
  * Message: Test.proto, line 63
  *******************************************************************/
 
@@ -104,15 +113,6 @@ int B_write_with_tag(struct B *_B, void *_buffer, int offset, int tag);
  */
 int B_read_delimited_from(void *_buffer, struct B *_B, int offset);
 
-
-/*******************************************************************
- * Enumeration: Test.proto, line 11
- *******************************************************************/
-enum PhoneType {
-  _MOBILE = 0,
-  _HOME = 1,
-  _WORK = 2
-};
 
 /*******************************************************************
  * Message: Test.proto, line 17

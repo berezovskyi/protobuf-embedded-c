@@ -292,6 +292,18 @@ unsigned long Message_get_delimited_size(void *_buffer, int offset) {
 
 
 /*******************************************************************
+ * Enum: Test.proto, line 11
+ *******************************************************************/
+int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offset, int tag) {
+    /* Write tag.*/
+    offset = write_raw_varint32((tag<<3)+0, _buffer, offset);
+    /* Write content.*/
+    offset = write_raw_varint32(*_PhoneType, _buffer, offset);
+    
+    return offset;
+}
+
+/*******************************************************************
  * Message: Test.proto, line 63
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
@@ -452,18 +464,6 @@ int B_read_delimited_from(void *_buffer, struct B *_B, int offset) {
     return offset + size;
 }
 
-
-/*******************************************************************
- * Enum: Test.proto, line 11
- *******************************************************************/
-int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offset, int tag) {
-    /* Write tag.*/
-    offset = write_raw_varint32((tag<<3)+0, _buffer, offset);
-    /* Write content.*/
-    offset = write_raw_varint32(*_PhoneType, _buffer, offset);
-    
-    return offset;
-}
 
 /*******************************************************************
  * Message: Test.proto, line 17
