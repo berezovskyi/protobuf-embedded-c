@@ -1,6 +1,6 @@
 #summary Home of Protobuf-Embedded-C
+#labels Featured
 
 = Introduction =
 
 Work in progress.
-
