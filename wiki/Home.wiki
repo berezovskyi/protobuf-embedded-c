@@ -10,12 +10,12 @@ This page is intended for all developers, which want to maintain or extend the P
   # Install *Subclipse*, a SVN client integration for Eclipse. Subclipse can be installed by using the Eclipse update manager url: http://subclipse.tigris.org/update_1.8.x
   # Install the *C/C++ Development Tools* from the Eclipse update manager using the following url: http://download.eclipse.org/releases/juno
   # Other prerequisites for the ANTLR IDE:
-    * *Dynamic Language Toolkit(DLTK) Core* Version: 3.0.1 (*Note*: This version is no longer available in the Eclipse update site. Use this link http://www.eclipse.org/dltk/ for download)
+    * *Dynamic Language Toolkit (DLTK) Core* Version: 3.0.1 (*Note*: This version is no longer available in the Eclipse update site. Use this link http://www.eclipse.org/dltk/ for download)
     * *Zest* Version: 1.3.0+
     * *GEF* Version: 3.7.0+
   # Install the *ANTLR IDE* via the update manager: http://antlrv3ide.sourceforge.net/updates or manually download it from http://sourceforge.net/projects/antlrv3ide/files/antlride/2.1.0/antlride-2.1.2.zip/download
   # Download *ANTLR 3.4* http://www.antlr.org/wiki/display/ANTLR3/ANTLR+3.4+Release+Notes
-  # In the *Preferences* window of Eclipse add in the *ANTLR/Builder* tab the path to ANTLR 3.4. In the *ANTLR/Code Generator* tab check the _Project relative folder_ radio button and add _generated-src_ inside the text-box. Also select the _Append java package to output folder_ check box.
+  # Add in the *ANTLR/Builder* tab of the Eclipse *Preferences* window the path to ANTLR 3.4. In the *ANTLR/Code Generator* tab check the _Project relative folder_ radio button and add _generated-src_ inside the corresponding text-box. Also select the _Append java package to output folder_ check box.
   # Checkout the *edu.tum.cs.ccts.protobuf.embedded* project from the svn address https://protobuf-embedded-c.googlecode.com/svn/trunk/ in your workspace.
   # Generate the *grammar* .g files.
   # Generate the *java class* from the .proto-file in the test folder of the project. The batch script *generate-test-protos.bat* in the test folder of the project automatically does this for you if edited as follows: replace the _<INSERT YOUR WORKSPACE PATH HERE>_ value of the attribute _workspace_ with the path of the workspace.
