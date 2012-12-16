@@ -18,10 +18,10 @@ This page is intended for all developers, which want to maintain or extend the P
   # Add in the *ANTLR/Builder* tab of the Eclipse *Preferences* window the path to ANTLR 3.4. In the *ANTLR/Code Generator* tab check the _Project relative folder_ radio button and add _generated-src_ inside the corresponding text-box. Also select the _Append java package to output folder_ check box.
   # Checkout the *edu.tum.cs.ccts.protobuf.embedded* project from the svn address https://protobuf-embedded-c.googlecode.com/svn/trunk/ in your workspace.
   # Generate the *grammar* .g files.
-  # Download Google's Protocol Buffers Version 2.4.1 from http://code.google.com/p/protobuf/downloads/list
+  # Download Google's Protocol Buffers version 2.4.1 from http://code.google.com/p/protobuf/downloads/list
   # Make sure the protoc executable is set to your variable path.
   # Generate the *java class* from the .proto-file in the test folder of the project. The batch script *generate-test-protos.bat* in the test folder of the project automatically does this for you if edited as follows: replace the _<INSERT YOUR WORKSPACE PATH HERE>_ value of the attribute _workspace_ with the path of the workspace.
   # Now the Eclipse project should compile without errors :)
   # Before running the Protoc.java class add: _-I=test --c_out=test test.proto_ to the *Run configurations...*
-  # Now the .c and .h files are generated and need to be *compiled* (e.q.: _gcc -Wall Main.c Test.c -o Test_)
+  # Now the .c and .h files are generated and need to be *compiled* (e.q.: _gcc -Wall Main.c Test.c -o Test_).
   # In the end the *JUnit tests* can be executed by running the TestWireFormat.java class in the _test-src_ folder of the project. 
