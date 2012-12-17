@@ -24,4 +24,4 @@ This page is intended for all developers, which want to maintain or extend the P
   # Now the Eclipse project should compile without errors :)
   # Before running the Protoc.java class add: _-I=test --c_out=test test.proto_ to the *Run configurations...*
   # Now the .c and .h files are generated and need to be *compiled* (e.q.: _gcc -Wall Main.c Test.c -o Test_).
-  # In the end the *JUnit tests* can be executed by running the _TestWireFormat.java_ class in the _test-src_ folder of the project. 
+  # In the end the *JUnit tests* can be executed by running the _TestWireFormat_ class in the _test-src_ folder of the project. 
