@@ -47,7 +47,7 @@ enum PhoneType {
 };
 
 /*******************************************************************
- * Message: Test.proto, line 63
+ * Message: Test.proto, line 79
  *******************************************************************/
 
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
@@ -82,7 +82,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 72
+ * Message: Test.proto, line 88
  *******************************************************************/
 
 /* Maximum size of a serialized B-message, useful for buffer allocation. */
@@ -153,7 +153,7 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
  *******************************************************************/
 
 /* Maximum size of a serialized Person-message, useful for buffer allocation. */
-#define MAX_Person_SIZE 18966
+#define MAX_Person_SIZE 19152
 
 /* Structure that holds a deserialized Person-message. */
 struct Person {
@@ -220,6 +220,24 @@ struct Person {
   double _doubleAttr[MAX_REPEATED_LEN];
   int _enumAttr_repeated_len;
   enum PhoneType _enumAttr[MAX_REPEATED_LEN];
+  enum PhoneType _optEnum;
+  float _optFloat;
+  double _optDouble;
+  char _optBool;
+  signed long _optInt32;
+  signed long long _optInt64;
+  signed long _optSInt32;
+  signed long long _optSInt64;
+  unsigned long _optUInt32;
+  unsigned long long _optUInt64;
+  unsigned long _optFixed32;
+  unsigned long long _optFixed64;
+  signed long _optSFixed32;
+  signed long long _optSFixed64;
+  int _optString_len;
+  char _optString[MAX_STRING_LEN];
+  int _optBytes_len;
+  char _optBytes[MAX_BYTES_LEN];
 };
 /*
  * Serialize a Person-message into the given buffer at offset and return
@@ -244,7 +262,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 68
+ * Message: Test.proto, line 84
  *******************************************************************/
 
 /* Maximum size of a serialized C-message, useful for buffer allocation. */
@@ -277,7 +295,7 @@ int C_read_delimited_from(void *_buffer, struct C *_C, int offset);
 
 
 /*******************************************************************
- * Message: Test.proto, line 76
+ * Message: Test.proto, line 92
  *******************************************************************/
 
 /* Maximum size of a serialized A-message, useful for buffer allocation. */

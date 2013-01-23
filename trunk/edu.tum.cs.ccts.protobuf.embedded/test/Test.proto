@@ -58,6 +58,22 @@ message Person {
   repeated float floatAttr = 14;
   repeated double doubleAttr = 19;
   repeated PhoneType enumAttr = 15;
+  optional PhoneType optEnum = 39;
+  optional float optFloat = 40;
+  optional double optDouble = 41;
+  optional bool optBool = 42;
+  optional int32 optInt32 = 43;
+  optional int64 optInt64 = 44;
+  optional sint32 optSInt32 = 45;
+  optional sint64 optSInt64 = 46;
+  optional uint32 optUInt32 = 47;
+  optional uint64 optUInt64 = 48;
+  optional fixed32 optFixed32 = 49;
+  optional fixed64 optFixed64 = 50;
+  optional sfixed32 optSFixed32 = 51;
+  optional sfixed64 optSFixed64 = 52;
+  optional string optString = 53;
+  optional bytes optBytes = 54;
 }
 
 message AddressBook {
@@ -76,4 +92,3 @@ message B {
 message A{
 	required B b = 1;
 }
-

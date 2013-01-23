@@ -18,6 +18,17 @@
  * General functions
  *******************************************************************/
  
+int _memcmp(const void *p1, const void *p2, unsigned int size) {
+    unsigned int i;
+    for(i = 0; i < size; ++ i) {
+        if(*((char*)p1 + i) > *((char*)p1 + i))
+            return 1;
+        if(*((char*)p1 + i) < *((char*)p1 + i))
+            return -1;
+    }
+    return 0;
+} 
+ 
 void _memset(void *msg_ptr, char init_val, unsigned int size) {
     int i;
     for(i = 0; i < size; ++ i)
@@ -97,12 +108,12 @@ int write_raw_bytes(char *bytes, int bytes_size, void *_buffer, int offset) {
 }
 
 unsigned long encode_zig_zag32(signed long n) {
-    // Note:  the right-shift must be arithmetic
+    /* Note:  the right-shift must be arithmetic. */
     return (n << 1) ^ (n >> 31);
 }
 
 unsigned long long encode_zig_zag64(signed long long n) {
-    // Note:  the right-shift must be arithmetic
+    /* Note:  the right-shift must be arithmetic. */
     return (n << 1) ^ (n >> 63);
 } 
 
@@ -197,7 +208,7 @@ int read_raw_varint32(unsigned long *tag, void *_buffer, int offset) {
                 offset = read_raw_byte((char *)&result, _buffer, offset);
                 *tag |= ((unsigned long)result) << 28;
                 if (result < 0) {
-                    // Discard upper 32 bits.
+                    /* Discard upper 32 bits. */
                     int i;
                     for (i = 0; i < 5; ++ i) {
                         offset = read_raw_byte((char *)&result, _buffer, offset);
@@ -205,7 +216,7 @@ int read_raw_varint32(unsigned long *tag, void *_buffer, int offset) {
                             return offset;
                         }
                     }
-                    //invalid state
+                    /* Invalid state. */
                 }
             }
         }
@@ -225,54 +236,54 @@ int read_raw_varint64(unsigned long long *tag, void *_buffer, int offset) {
         }
         shift += 7;
     }
-    //return error code.
+    /* return error code. */
     return -1;
 }
 
 int can_read_raw_varint32(void *_buffer, int offset, int length) {
     signed char c;
     
-    // Bound length to valid range [0..5].
+    /* Bound length to valid range [0..5]. */
     if (length < 0) length = 0; else
     if (length > 5) length = 5;
     
     while (length > 0) {
         offset = read_raw_byte((char *)&c, _buffer, offset);
         if (c >= 0) {
-            return 1; // Can read (1 == true).
+            return 1; /* Can read (1 == true). */
         }
         length--;
     }
     
-    return 0; // Cannot read (0 == false).
+    return 0; /* Cannot read (0 == false). */
 }
 
 int can_read_raw_varint64(void *_buffer, int offset, int length) {
     signed char c;
     
-    // Bound length to valid range [0..5].
+    /* Bound length to valid range [0..5]. */
     if (length < 0) length = 0; else
     if (length > 10) length = 10;
     
     while (length > 0) {
         offset = read_raw_byte((char *)&c, _buffer, offset);
         if (c >= 0) {
-            return 1; // Can read (1 == true).
+            return 1; /* Can read (1 == true). */
         }
         length--;
     }
     
-    return 0; // Cannot read (0 == false).
+    return 0; /* Cannot read (0 == false). */
 }
 
 int Message_can_read_delimited_from(void *_buffer, int offset, int length) {
     unsigned long size;
     int payload_offset;
 
-    if (length <= 0) return 0; // Cannot read from empty or invalid message.
+    if (length <= 0) return 0; /* Cannot read from empty or invalid message. */
 
     if (!can_read_raw_varint32(_buffer, offset, length)) {
-        return 0; // Could not even read the preceding size as varint32.
+        return 0; /* Could not even read the preceding size as varint32. */
     }
 
     payload_offset = read_raw_varint32(&size, _buffer, offset);
@@ -304,7 +315,7 @@ int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offs
 }
 
 /*******************************************************************
- * Message: Test.proto, line 63
+ * Message: Test.proto, line 79
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -361,7 +372,7 @@ int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _AddressBook._address 
+            /* tag of: _AddressBook._address */ 
             case 1 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -369,7 +380,7 @@ int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_AddressBook->_address + i), _buffer, offset);
                 break;
-            //tag of: _AddressBook._number 
+            /* tag of: _AddressBook._number */ 
             case 2 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _AddressBook->_number = (signed long)tag;
@@ -391,7 +402,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 72
+ * Message: Test.proto, line 88
  *******************************************************************/
 int B_write(struct B *_B, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -444,7 +455,7 @@ int B_read(void *_buffer, struct B *_B, int offset, int limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _B._i 
+            /* tag of: _B._i */ 
             case 1 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _B->_i = (signed long)tag;
@@ -518,13 +529,13 @@ int PhoneNumber_read(void *_buffer, struct PhoneNumber *_PhoneNumber, int offset
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _PhoneNumber._number 
+            /* tag of: _PhoneNumber._number */ 
             case 1 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 float *number = (float *)(&tag);
                 _PhoneNumber->_number = *number;
                 break;
-            //tag of: _PhoneNumber._type 
+            /* tag of: _PhoneNumber._type */ 
             case 2 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _PhoneNumber->_type = tag;
@@ -631,12 +642,14 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_bytes(_Person->_strAttr[strAttr_cnt], _Person->_strAttr_len[strAttr_cnt], _buffer, offset);
     }
 
+
     int bAttr_cnt;
     for (bAttr_cnt = 0; bAttr_cnt < _Person->_bAttr_repeated_len; ++ bAttr_cnt) {
         offset = write_raw_varint32((37<<3)+2, _buffer, offset);
         offset = write_raw_varint32(_Person->_bAttr_len[bAttr_cnt], _buffer, offset);
         offset = write_raw_bytes(_Person->_bAttr[bAttr_cnt], _Person->_bAttr_len[bAttr_cnt], _buffer, offset);
     }
+
 
     int intAttr_cnt;
     for (intAttr_cnt = 0; intAttr_cnt < _Person->_intAttr_repeated_len; ++ intAttr_cnt) {
@@ -647,11 +660,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
             offset = write_raw_varint64(_Person->_intAttr[intAttr_cnt], _buffer, offset);
     }
 
+
     int int64Attr_cnt;
     for (int64Attr_cnt = 0; int64Attr_cnt < _Person->_int64Attr_repeated_len; ++ int64Attr_cnt) {
         offset = write_raw_varint32((17<<3)+0, _buffer, offset);
         offset = write_raw_varint64(_Person->_int64Attr[int64Attr_cnt], _buffer, offset);
     }
+
 
     int sintAttr_cnt;
     for (sintAttr_cnt = 0; sintAttr_cnt < _Person->_sintAttr_repeated_len; ++ sintAttr_cnt) {
@@ -659,11 +674,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_varint32(encode_zig_zag32(_Person->_sintAttr[sintAttr_cnt]), _buffer, offset);
     }
 
+
     int sintAttr64_cnt;
     for (sintAttr64_cnt = 0; sintAttr64_cnt < _Person->_sintAttr64_repeated_len; ++ sintAttr64_cnt) {
         offset = write_raw_varint32((23<<3)+0, _buffer, offset);
         offset = write_raw_varint64(encode_zig_zag64(_Person->_sintAttr64[sintAttr64_cnt]), _buffer, offset);
     }
+
 
     int uintAttr_cnt;
     for (uintAttr_cnt = 0; uintAttr_cnt < _Person->_uintAttr_repeated_len; ++ uintAttr_cnt) {
@@ -671,11 +688,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_varint32(_Person->_uintAttr[uintAttr_cnt], _buffer, offset);
     }
 
+
     int uintAttr64_cnt;
     for (uintAttr64_cnt = 0; uintAttr64_cnt < _Person->_uintAttr64_repeated_len; ++ uintAttr64_cnt) {
         offset = write_raw_varint32((27<<3)+0, _buffer, offset);
         offset = write_raw_varint64(_Person->_uintAttr64[uintAttr64_cnt], _buffer, offset);
     }
+
 
     int fintAttr_cnt;
     for (fintAttr_cnt = 0; fintAttr_cnt < _Person->_fintAttr_repeated_len; ++ fintAttr_cnt) {
@@ -683,11 +702,13 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_little_endian32(_Person->_fintAttr[fintAttr_cnt], _buffer, offset);
     }
 
+
     int fintAttr64_cnt;
     for (fintAttr64_cnt = 0; fintAttr64_cnt < _Person->_fintAttr64_repeated_len; ++ fintAttr64_cnt) {
         offset = write_raw_varint32((31<<3)+1, _buffer, offset);
         offset = write_raw_little_endian64(_Person->_fintAttr64[fintAttr64_cnt], _buffer, offset);
     }
+
 
     int sfintAttr_cnt;
     for (sfintAttr_cnt = 0; sfintAttr_cnt < _Person->_sfintAttr_repeated_len; ++ sfintAttr_cnt) {
@@ -695,17 +716,20 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_little_endian32(_Person->_sfintAttr[sfintAttr_cnt], _buffer, offset);
     }
 
+
     int sfintAttr64_cnt;
     for (sfintAttr64_cnt = 0; sfintAttr64_cnt < _Person->_sfintAttr64_repeated_len; ++ sfintAttr64_cnt) {
         offset = write_raw_varint32((35<<3)+1, _buffer, offset);
         offset = write_raw_little_endian64(_Person->_sfintAttr64[sfintAttr64_cnt], _buffer, offset);
     }
 
+
     int boolAttr_cnt;
     for (boolAttr_cnt = 0; boolAttr_cnt < _Person->_boolAttr_repeated_len; ++ boolAttr_cnt) {
         offset = write_raw_varint32((13<<3)+0, _buffer, offset);
         offset = write_raw_byte(_Person->_boolAttr[boolAttr_cnt], _buffer, offset);
     }
+
 
     int floatAttr_cnt;
     for (floatAttr_cnt = 0; floatAttr_cnt < _Person->_floatAttr_repeated_len; ++ floatAttr_cnt) {
@@ -714,6 +738,7 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_little_endian32(*floatAttr_ptr, _buffer, offset);
     }
 
+
     int doubleAttr_cnt;
     for (doubleAttr_cnt = 0; doubleAttr_cnt < _Person->_doubleAttr_repeated_len; ++ doubleAttr_cnt) {
         offset = write_raw_varint32((19<<3)+1, _buffer, offset);
@@ -721,9 +746,113 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_little_endian64(*doubleAttr_ptr, _buffer, offset);
     }
 
+
     int enumAttr_cnt;
     for (enumAttr_cnt = 0; enumAttr_cnt < _Person->_enumAttr_repeated_len; ++ enumAttr_cnt) {
         offset = PhoneType_write_with_tag(&_Person->_enumAttr[enumAttr_cnt], _buffer, offset, 15);
+    }
+
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optEnum != 0) {
+        offset = PhoneType_write_with_tag(&_Person->_optEnum, _buffer, offset, 39);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optFloat != 0.0f) {
+        offset = write_raw_varint32((40<<3)+5, _buffer, offset);
+        unsigned long *optFloat_ptr = (unsigned long *)&_Person->_optFloat;
+        offset = write_raw_little_endian32(*optFloat_ptr, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optDouble != 0.0f) {
+        offset = write_raw_varint32((41<<3)+1, _buffer, offset);
+        unsigned long long *optDouble_ptr = (unsigned long long*)&_Person->_optDouble;
+        offset = write_raw_little_endian64(*optDouble_ptr, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optBool != 0) {
+        offset = write_raw_varint32((42<<3)+0, _buffer, offset);
+        offset = write_raw_byte(_Person->_optBool, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optInt32 != 0) {
+        offset = write_raw_varint32((43<<3)+0, _buffer, offset);
+        if (_Person->_optInt32 >= 0)
+            offset = write_raw_varint32(_Person->_optInt32, _buffer, offset);
+        else
+            offset = write_raw_varint64(_Person->_optInt32, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optInt64 != 0) {
+        offset = write_raw_varint32((44<<3)+0, _buffer, offset);
+        offset = write_raw_varint64(_Person->_optInt64, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optSInt32 != 0) {
+        offset = write_raw_varint32((45<<3)+0, _buffer, offset);
+        offset = write_raw_varint32(encode_zig_zag32(_Person->_optSInt32), _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optSInt64 != 0) {
+        offset = write_raw_varint32((46<<3)+0, _buffer, offset);
+        offset = write_raw_varint64(encode_zig_zag64(_Person->_optSInt64), _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optUInt32 != 0) {
+        offset = write_raw_varint32((47<<3)+0, _buffer, offset);
+        offset = write_raw_varint32(_Person->_optUInt32, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optUInt64 != 0) {
+        offset = write_raw_varint32((48<<3)+0, _buffer, offset);
+        offset = write_raw_varint64(_Person->_optUInt64, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optFixed32 != 0) {
+        offset = write_raw_varint32((49<<3)+5, _buffer, offset);
+        offset = write_raw_little_endian32(_Person->_optFixed32, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optFixed64 != 0) {
+        offset = write_raw_varint32((50<<3)+1, _buffer, offset);
+        offset = write_raw_little_endian64(_Person->_optFixed64, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optSFixed32 != 0) {
+        offset = write_raw_varint32((51<<3)+5, _buffer, offset);
+        offset = write_raw_little_endian32(_Person->_optSFixed32, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optSFixed64 != 0) {
+        offset = write_raw_varint32((52<<3)+1, _buffer, offset);
+        offset = write_raw_little_endian64(_Person->_optSFixed64, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optString_len != 0) {
+        offset = write_raw_varint32((53<<3)+2, _buffer, offset);
+        offset = write_raw_varint32(_Person->_optString_len, _buffer, offset);
+        offset = write_raw_bytes(_Person->_optString, _Person->_optString_len, _buffer, offset);
+    }
+
+    /* Write the optional attribute only if it is different than the default value. */
+    if(_Person->_optBytes_len != 0) {
+        offset = write_raw_varint32((54<<3)+2, _buffer, offset);
+        offset = write_raw_varint32(_Person->_optBytes_len, _buffer, offset);
+        offset = write_raw_bytes(_Person->_optBytes, _Person->_optBytes_len, _buffer, offset);
     }
     
     return offset;
@@ -769,11 +898,11 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _Person._ab 
+            /* tag of: _Person._ab */ 
             case 38 :
                 offset = AddressBook_read_delimited_from(_buffer, &_Person->_ab, offset);
                 break;
-            //tag of: _Person._name1 
+            /* tag of: _Person._name1 */ 
             case 1 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -781,7 +910,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name1 + i), _buffer, offset);
                 break;
-            //tag of: _Person._name2 
+            /* tag of: _Person._name2 */ 
             case 2 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -789,7 +918,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name2 + i), _buffer, offset);
                 break;
-            //tag of: _Person._name3 
+            /* tag of: _Person._name3 */ 
             case 3 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -797,7 +926,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name3 + i), _buffer, offset);
                 break;
-            //tag of: _Person._name4 
+            /* tag of: _Person._name4 */ 
             case 4 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -805,7 +934,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name4 + i), _buffer, offset);
                 break;
-            //tag of: _Person._name5 
+            /* tag of: _Person._name5 */ 
             case 5 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -813,7 +942,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name5 + i), _buffer, offset);
                 break;
-            //tag of: _Person._name6 
+            /* tag of: _Person._name6 */ 
             case 6 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -821,7 +950,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_name6 + i), _buffer, offset);
                 break;
-            //tag of: _Person._bname 
+            /* tag of: _Person._bname */ 
             case 36 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -829,79 +958,79 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_bname + i), _buffer, offset);
                 break;
-            //tag of: _Person._id 
+            /* tag of: _Person._id */ 
             case 7 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_id = (signed long)tag;
                 break;
-            //tag of: _Person._id64 
+            /* tag of: _Person._id64 */ 
             case 16 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_id64 = (signed long long)value;
                 break;
-            //tag of: _Person._sid 
+            /* tag of: _Person._sid */ 
             case 20 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_sid = decode_zig_zag32(tag);
                 break;
-            //tag of: _Person._sid64 
+            /* tag of: _Person._sid64 */ 
             case 22 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_sid64 = decode_zig_zag64(value);
                 break;
-            //tag of: _Person._uid 
+            /* tag of: _Person._uid */ 
             case 24 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_uid = tag;
                 break;
-            //tag of: _Person._uid64 
+            /* tag of: _Person._uid64 */ 
             case 26 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_uid64 = value;
                 break;
-            //tag of: _Person._fid32 
+            /* tag of: _Person._fid32 */ 
             case 28 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 _Person->_fid32 = tag;
                 break;
-            //tag of: _Person._fid64 
+            /* tag of: _Person._fid64 */ 
             case 30 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 _Person->_fid64 = value;
                 break;
-            //tag of: _Person._sfid32 
+            /* tag of: _Person._sfid32 */ 
             case 32 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 _Person->_sfid32 = (signed long)tag;
                 break;
-            //tag of: _Person._sfid64 
+            /* tag of: _Person._sfid64 */ 
             case 34 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 _Person->_sfid64 = (signed long long)value;
                 break;
-            //tag of: _Person._iq 
+            /* tag of: _Person._iq */ 
             case 8 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 float *iq = (float *)(&tag);
                 _Person->_iq = *iq;
                 break;
-            //tag of: _Person._iqd 
+            /* tag of: _Person._iqd */ 
             case 18 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 double *iqd = (double *)(&value);
                 _Person->_iqd = *iqd;
                 break;
-            //tag of: _Person._email 
+            /* tag of: _Person._email */ 
             case 9 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_email = tag & 1;
                 break;
-            //tag of: _Person._phone 
+            /* tag of: _Person._phone */ 
             case 10 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_phone = tag;
                 break;
-            //tag of: _Person._strAttr 
+            /* tag of: _Person._strAttr */ 
             case 11 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -914,7 +1043,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 /* Advance to next string. */
                 _Person->_strAttr_repeated_len++;    
                 break;
-            //tag of: _Person._bAttr 
+            /* tag of: _Person._bAttr */ 
             case 37 :
                  /* Re-use 'tag' to store string length. */
                 offset = read_raw_varint32(&tag, _buffer, offset);
@@ -927,77 +1056,165 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 /* Advance to next string. */
                 _Person->_bAttr_repeated_len++;    
                 break;
-            //tag of: _Person._intAttr 
+            /* tag of: _Person._intAttr */ 
             case 12 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_intAttr[(int)_Person->_intAttr_repeated_len++] = (signed long)tag;
                 break;
-            //tag of: _Person._int64Attr 
+            /* tag of: _Person._int64Attr */ 
             case 17 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_int64Attr[(int)_Person->_int64Attr_repeated_len++] = (signed long long)value;
                 break;
-            //tag of: _Person._sintAttr 
+            /* tag of: _Person._sintAttr */ 
             case 21 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_sintAttr[(int)_Person->_sintAttr_repeated_len++] = decode_zig_zag32(tag);
                 break;
-            //tag of: _Person._sintAttr64 
+            /* tag of: _Person._sintAttr64 */ 
             case 23 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_sintAttr64[(int)_Person->_sintAttr64_repeated_len++] = decode_zig_zag64(value);
                 break;
-            //tag of: _Person._uintAttr 
+            /* tag of: _Person._uintAttr */ 
             case 25 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_uintAttr[(int)_Person->_uintAttr_repeated_len++] = tag;
                 break;
-            //tag of: _Person._uintAttr64 
+            /* tag of: _Person._uintAttr64 */ 
             case 27 :
                 offset = read_raw_varint64(&value, _buffer, offset);
                 _Person->_uintAttr64[(int)_Person->_uintAttr64_repeated_len++] = value;
                 break;
-            //tag of: _Person._fintAttr 
+            /* tag of: _Person._fintAttr */ 
             case 29 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 _Person->_fintAttr[(int)_Person->_fintAttr_repeated_len++] = tag;
                 break;
-            //tag of: _Person._fintAttr64 
+            /* tag of: _Person._fintAttr64 */ 
             case 31 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 _Person->_fintAttr64[(int)_Person->_fintAttr64_repeated_len++] = value;
                 break;
-            //tag of: _Person._sfintAttr 
+            /* tag of: _Person._sfintAttr */ 
             case 33 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 _Person->_sfintAttr[(int)_Person->_sfintAttr_repeated_len++] = (signed long)tag;
                 break;
-            //tag of: _Person._sfintAttr64 
+            /* tag of: _Person._sfintAttr64 */ 
             case 35 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 _Person->_sfintAttr64[(int)_Person->_sfintAttr64_repeated_len++] = (signed long long)value;
                 break;
-            //tag of: _Person._boolAttr 
+            /* tag of: _Person._boolAttr */ 
             case 13 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_boolAttr[(int)_Person->_boolAttr_repeated_len++] = tag & 1;
                 break;
-            //tag of: _Person._floatAttr 
+            /* tag of: _Person._floatAttr */ 
             case 14 :
                 offset = read_raw_little_endian32(&tag, _buffer, offset);
                 float *floatAttr = (float *)(&tag);
                 _Person->_floatAttr[(int)_Person->_floatAttr_repeated_len++] = *floatAttr;
                 break;
-            //tag of: _Person._doubleAttr 
+            /* tag of: _Person._doubleAttr */ 
             case 19 :
                 offset = read_raw_little_endian64(&value, _buffer, offset);
                 double *doubleAttr = (double *)(&value);
                 _Person->_doubleAttr[(int)_Person->_doubleAttr_repeated_len++] = *doubleAttr;
                 break;
-            //tag of: _Person._enumAttr 
+            /* tag of: _Person._enumAttr */ 
             case 15 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
                 _Person->_enumAttr[(int)_Person->_enumAttr_repeated_len++] = tag;
+                break;
+            /* tag of: _Person._optEnum */ 
+            case 39 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optEnum = tag;
+                break;
+            /* tag of: _Person._optFloat */ 
+            case 40 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                float *optFloat = (float *)(&tag);
+                _Person->_optFloat = *optFloat;
+                break;
+            /* tag of: _Person._optDouble */ 
+            case 41 :
+                offset = read_raw_little_endian64(&value, _buffer, offset);
+                double *optDouble = (double *)(&value);
+                _Person->_optDouble = *optDouble;
+                break;
+            /* tag of: _Person._optBool */ 
+            case 42 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optBool = tag & 1;
+                break;
+            /* tag of: _Person._optInt32 */ 
+            case 43 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optInt32 = (signed long)tag;
+                break;
+            /* tag of: _Person._optInt64 */ 
+            case 44 :
+                offset = read_raw_varint64(&value, _buffer, offset);
+                _Person->_optInt64 = (signed long long)value;
+                break;
+            /* tag of: _Person._optSInt32 */ 
+            case 45 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optSInt32 = decode_zig_zag32(tag);
+                break;
+            /* tag of: _Person._optSInt64 */ 
+            case 46 :
+                offset = read_raw_varint64(&value, _buffer, offset);
+                _Person->_optSInt64 = decode_zig_zag64(value);
+                break;
+            /* tag of: _Person._optUInt32 */ 
+            case 47 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optUInt32 = tag;
+                break;
+            /* tag of: _Person._optUInt64 */ 
+            case 48 :
+                offset = read_raw_varint64(&value, _buffer, offset);
+                _Person->_optUInt64 = value;
+                break;
+            /* tag of: _Person._optFixed32 */ 
+            case 49 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                _Person->_optFixed32 = tag;
+                break;
+            /* tag of: _Person._optFixed64 */ 
+            case 50 :
+                offset = read_raw_little_endian64(&value, _buffer, offset);
+                _Person->_optFixed64 = value;
+                break;
+            /* tag of: _Person._optSFixed32 */ 
+            case 51 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                _Person->_optSFixed32 = (signed long)tag;
+                break;
+            /* tag of: _Person._optSFixed64 */ 
+            case 52 :
+                offset = read_raw_little_endian64(&value, _buffer, offset);
+                _Person->_optSFixed64 = (signed long long)value;
+                break;
+            /* tag of: _Person._optString */ 
+            case 53 :
+                 /* Re-use 'tag' to store string length. */
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optString_len = tag;
+                for(i = 0; i < tag; ++ i) 
+                    offset = read_raw_byte((_Person->_optString + i), _buffer, offset);
+                break;
+            /* tag of: _Person._optBytes */ 
+            case 54 :
+                 /* Re-use 'tag' to store string length. */
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _Person->_optBytes_len = tag;
+                for(i = 0; i < tag; ++ i) 
+                    offset = read_raw_byte((_Person->_optBytes + i), _buffer, offset);
                 break;
         }
     }
@@ -1016,7 +1233,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 68
+ * Message: Test.proto, line 84
  *******************************************************************/
 int C_write(struct C *_C, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -1064,7 +1281,7 @@ int C_read(void *_buffer, struct C *_C, int offset, int limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _C._b 
+            /* tag of: _C._b */ 
             case 1 :
                 offset = B_read_delimited_from(_buffer, &_C->_b, offset);
                 break;
@@ -1085,7 +1302,7 @@ int C_read_delimited_from(void *_buffer, struct C *_C, int offset) {
 
 
 /*******************************************************************
- * Message: Test.proto, line 76
+ * Message: Test.proto, line 92
  *******************************************************************/
 int A_write(struct A *_A, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -1133,7 +1350,7 @@ int A_read(void *_buffer, struct A *_A, int offset, int limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _A._b 
+            /* tag of: _A._b */ 
             case 1 :
                 offset = B_read_delimited_from(_buffer, &_A->_b, offset);
                 break;

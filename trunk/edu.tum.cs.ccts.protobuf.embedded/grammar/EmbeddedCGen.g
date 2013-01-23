@@ -126,7 +126,7 @@ annotationDecl
 	;
 
 messageElement
-	:	^(ASSIGN MODIFIER (t=TYPE | t=ID) n=ID INTEGER )
+	:	^(ASSIGN MODIFIER (t=TYPE | t=ID) n=ID INTEGER)
 	   {
 	      ++ elementCount;
          Integer repeatedLength;
@@ -190,8 +190,13 @@ messageElement
 			     typeName={$t.text},
 			     typeClass={typeMap.containsKey($t.text)?typeMap.get($t.text):"native"},
 			     name={$n.text}, 
-			     tag={$INTEGER.text} )
+			     tag={$INTEGER.text},
+			     def={null} )
 	;
+	
+elementDefault
+  : ^(ASSIGN DEFAULT def_val=ID)
+  ;
 
 qualifiedID
 	:	(i+=ID)+

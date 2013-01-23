@@ -99,7 +99,7 @@ qualifiedID
 	;
 
 MODIFIER
-	:	'required' | 'repeated'
+	:	'required' | 'repeated' | 'optional'
 	;
 
 TYPE

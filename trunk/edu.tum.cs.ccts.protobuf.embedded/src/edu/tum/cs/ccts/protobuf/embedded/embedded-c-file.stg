@@ -66,7 +66,7 @@ messageMap ::= ["message":"true"]
 arrayTypes ::= ["string":"true", "bytes":"true"]
 fixedSizeMap ::= ["double":"8", "float":"4", "fixed64":"8", "fixed32":"4", "sfixed64":"8", "sfixed32":"4", "bool":"1"]
 arrayModifiers ::= ["repeated":"true"]
-optionalModifier ::= ["optional":"true"]
+optionalModifiers ::= ["optional":"true"]
 
 proto(packageDecl, importDecls, declarations, filename, max_repeated_length, max_string_length, max_bytes_length) ::= <<
 /******************************************************************* 
@@ -89,6 +89,17 @@ $importDecls; separator="\n"$
 /*******************************************************************
  * General functions
  *******************************************************************/
+ 
+int _memcmp(const void *p1, const void *p2, unsigned int size) {
+    unsigned int i;
+    for(i = 0; i < size; ++ i) {
+        if(*((char*)p1 + i) > *((char*)p1 + i))
+            return 1;
+        if(*((char*)p1 + i) < *((char*)p1 + i))
+            return -1;
+    }
+    return 0;
+} 
  
 void _memset(void *msg_ptr, char init_val, unsigned int size) {
     int i;
@@ -719,9 +730,24 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset, $element.tag$);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$, _buffer, offset, $element.tag$);
+}
 $else$
 offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$, _buffer, offset, $element.tag$);
 $endif$
+
 $endif$
 >>
 
@@ -733,6 +759,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     unsigned long *$element.name$_ptr = (unsigned long *)&_$name$-\>_$element.name$[$element.name$_cnt];
     offset = write_raw_little_endian32(*$element.name$_ptr, _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0.0f) {
+
+$endif$
+    $writeTag(element)$
+    $writeFloatNoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -755,6 +796,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     unsigned long long *$element.name$_ptr = (unsigned long long*)&_$name$-\>_$element.name$[$element.name$_cnt];
     offset = write_raw_little_endian64(*$element.name$_ptr, _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0.0f) {
+
+$endif$
+    $writeTag(element)$
+    $writeDoubleNoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeDoubleNoTag(element)$
@@ -774,6 +830,21 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
     offset = write_raw_byte(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeBoolNoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -795,6 +866,22 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     offset = write_raw_varint32(_$name$-\>_$element.name$_len[$element.name$_cnt], _buffer, offset);
     offset = write_raw_bytes(_$name$-\>_$element.name$[$element.name$_cnt], _$name$-\>_$element.name$_len[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+char[32] defaultString = {$element.def$};
+if(_memcmp(_$name$-\>_$element.name$, defaultString, _$name$-\>_$element.name$_len) != 0) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$_len != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeStringNoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeStringNoTag(element)$
@@ -815,6 +902,22 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_varint32(_$name$-\>_$element.name$_len[$element.name$_cnt], _buffer, offset);
     offset = write_raw_bytes(_$name$-\>_$element.name$[$element.name$_cnt], _$name$-\>_$element.name$_len[$element.name$_cnt], _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+char[32] defaultBytes = {$element.def$};
+if(_memcmp(_$name$-\>_$element.name$, defaultBytes, _$name$-\>_$element.name$_len) != 0) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$_len != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeStringNoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -839,6 +942,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     else
         offset = write_raw_varint64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeInt32NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeInt32NoTag(element)$
@@ -861,6 +979,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_varint64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeInt64NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeInt64NoTag(element)$
@@ -879,6 +1012,21 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
     offset = write_raw_varint32(encode_zig_zag32(_$name$-\>_$element.name$[$element.name$_cnt]), _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeSInt32NoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -899,6 +1047,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_varint64(encode_zig_zag64(_$name$-\>_$element.name$[$element.name$_cnt]), _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeSInt64NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeSInt64NoTag(element)$
@@ -917,6 +1080,21 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
     offset = write_raw_varint32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeUInt32NoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -937,6 +1115,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_varint64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeUInt64NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeUInt64NoTag(element)$
@@ -955,6 +1148,21 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
     offset = write_raw_little_endian32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeFixed32NoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -975,6 +1183,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_little_endian64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeFixed64NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeFixed64NoTag(element)$
@@ -993,6 +1216,21 @@ int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
     $writeTag(element)$
     offset = write_raw_little_endian32(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
+}
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeSFixed32NoTag(element)$
 }
 $else$
 $writeTag(element)$
@@ -1013,6 +1251,21 @@ for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repe
     $writeTag(element)$
     offset = write_raw_little_endian64(_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset);
 }
+$elseif(optionalModifiers.(element.modifier))$
+$if(element.def)$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != $element.def$) {
+
+$else$
+
+/* Write the optional attribute only if it is different than the default value. */
+if(_$name$-\>_$element.name$ != 0) {
+
+$endif$
+    $writeTag(element)$
+    $writeSFixed64NoTag(element)$
+}
 $else$
 $writeTag(element)$
 $writeSFixed64NoTag(element)$
@@ -1029,7 +1282,7 @@ writeTag(element) ::= <<
 offset = write_raw_varint32(($element.tag$<<3)+$wireTypeMap.(element.typeName)$, _buffer, offset);
 >>
 
-messageAttribute(modifier, typeName, typeClass, name, tag) ::= <<>>
+messageAttribute(modifier, typeName, typeClass, name, tag, def) ::= <<>>
 
 qualifiedID(ids) ::= <<$ids; separator="."$>>
 
