@@ -102,7 +102,7 @@ int _memcmp(const void *p1, const void *p2, unsigned int size) {
 } 
  
 void _memset(void *msg_ptr, char init_val, unsigned int size) {
-    int i;
+    unsigned int i;
     for(i = 0; i < size; ++ i)
         *((char*)msg_ptr + i) = init_val;
 }
@@ -348,7 +348,7 @@ int can_read_raw_varint64(void *_buffer, int offset, int length) {
     return 0; /* Cannot read (0 == false). */
 }
 
-int Message_can_read_delimited_from(void *_buffer, int offset, int length) {
+int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length) {
     unsigned long size;
     int payload_offset;
 
@@ -438,7 +438,7 @@ $if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
 }$endif$
 
 int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
     $if(bigvalues)$    unsigned long long value = i;$endif$
 

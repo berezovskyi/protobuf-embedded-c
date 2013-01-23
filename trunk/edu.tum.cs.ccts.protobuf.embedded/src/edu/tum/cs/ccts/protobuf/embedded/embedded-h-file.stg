@@ -86,7 +86,7 @@ unsigned long Message_get_delimited_size(void *_buffer, int offset);
  * Returns 1 (true) if buffer[offset..offset+length-1] contains a complete
  * message or 0 (false) otherwise.
  */
-int Message_can_read_delimited_from(void *_buffer, int offset, int length);
+int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length);
 
 
 $declarations; separator="\n\n"$
