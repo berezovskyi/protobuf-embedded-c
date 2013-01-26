@@ -437,13 +437,19 @@ $if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
     _memset(_$name$, 0, sizeof(struct $name$));
 }$endif$
 
+$if(empty)$$else$void $name$_initOptionalAttributes(struct $name$ *_$name$) {
+    $elements:initOptional(element=it);separator="\n"$
+}$endif$
+
 int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
     $if(bigvalues)$    unsigned long long value = i;$endif$
 
     $if(empty)$$else$    /* Reset all attributes to 0 in advance. */
-    $name$_clear(_$name$);$endif$
+    $name$_clear(_$name$);
+    /* Assign the optional attributes. */
+    $name$_initOptionalAttributes(_$name$);$endif$
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -465,6 +471,201 @@ int $name$_read_delimited_from(void *_buffer, $if(empty)$$else$struct $name$ *_$
     return offset + size;
 }
 
+>>
+
+initOptional(element) ::= <<
+$if(optionalModifiers.(element.modifier))$
+$assignDefaultInt32(element)$
+$assignDefaultInt64(element)$
+$assignDefaultSInt32(element)$
+$assignDefaultSInt64(element)$
+$assignDefaultUInt32(element)$
+$assignDefaultUInt64(element)$
+$assignDefaultFixed32(element)$
+$assignDefaultFixed64(element)$
+$assignDefaultSFixed32(element)$
+$assignDefaultSFixed64(element)$
+$assignDefaultFloat(element)$
+$assignDefaultDouble(element)$
+$assignDefaultBool(element)$
+$assignDefaultEnum(element)$
+$assignDefaultString(element)$
+$assignDefaultBytes(element)$
+$assignDefaultMessage(element)$
+$endif$
+>>
+
+assignDefaultInt64(element) ::= <<
+$if(int64Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultString(element) ::= <<
+$if(stringMap.(element.typeName))$
+$if(element.def)$
+//TODO: Assign the correct length of the default value.
+_$name$->_$element.name$ = {$element.def$};
+$else$
+_$name$->_$element.name$_len = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultBytes(element) ::= <<
+$if(bytesMap.(element.typeName))$
+$if(element.def)$
+//TODO: Assign the correct length of the default value.
+_$name$->_$element.name$ = {$element.def$};
+$else$
+_$name$->_$element.name$_len = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultEnum(element) ::= <<
+$if(enumMap.(element.typeClass))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultMessage(element) ::= <<
+$if(!enumMap.(element.typeClass))$$if(!typeMap.(element.typeName))$
+$if(element.def)$
+//TODO: handle the default case for the embedded messages.
+$else$
+$name$_initOptionalAttributes(&_$name$->_$element.name$);
+$endif$
+$endif$
+$endif$
+>>
+
+assignDefaultBool(element) ::= <<
+$if(boolMap.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultFloat(element) ::= <<
+$if(floatMap.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0.0f;
+$endif$
+$endif$
+>>
+
+assignDefaultDouble(element) ::= <<
+$if(doubleMap.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0.0;
+$endif$
+$endif$
+>>
+
+assignDefaultInt32(element) ::= <<
+$if(int32Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultSInt32(element) ::= <<
+$if(sint32Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultSInt64(element) ::= <<
+$if(sint64Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultUInt32(element) ::= <<
+$if(uint32Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultUInt64(element) ::= <<
+$if(uint64Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultFixed32(element) ::= <<
+$if(fixed32Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultFixed64(element) ::= <<
+$if(fixed64Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultSFixed32(element) ::= <<
+$if(sfixed32Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
+>>
+
+assignDefaultSFixed64(element) ::= <<
+$if(sfixed64Map.(element.typeName))$
+$if(element.def)$
+_$name$->_$element.name$ = $element.def$;
+$else$
+_$name$->_$element.name$ = 0;
+$endif$
+$endif$
 >>
 
 caseElementTag(element) ::= <<
