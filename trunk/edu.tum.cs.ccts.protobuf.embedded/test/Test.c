@@ -30,7 +30,7 @@ int _memcmp(const void *p1, const void *p2, unsigned int size) {
 } 
  
 void _memset(void *msg_ptr, char init_val, unsigned int size) {
-    int i;
+    unsigned int i;
     for(i = 0; i < size; ++ i)
         *((char*)msg_ptr + i) = init_val;
 }
@@ -276,7 +276,7 @@ int can_read_raw_varint64(void *_buffer, int offset, int length) {
     return 0; /* Cannot read (0 == false). */
 }
 
-int Message_can_read_delimited_from(void *_buffer, int offset, int length) {
+int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length) {
     unsigned long size;
     int payload_offset;
 
@@ -315,7 +315,7 @@ int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offs
 }
 
 /*******************************************************************
- * Message: Test.proto, line 79
+ * Message: Test.proto, line 80
  *******************************************************************/
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -360,12 +360,17 @@ void AddressBook_clear(struct AddressBook *_AddressBook) {
     _memset(_AddressBook, 0, sizeof(struct AddressBook));
 }
 
+void AddressBook_initOptionalAttributes(struct AddressBook *_AddressBook) {
+}
+
 int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
 
     /* Reset all attributes to 0 in advance. */
     AddressBook_clear(_AddressBook);
+    /* Assign the optional attributes. */
+    AddressBook_initOptionalAttributes(_AddressBook);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -402,7 +407,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 88
+ * Message: Test.proto, line 89
  *******************************************************************/
 int B_write(struct B *_B, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -443,12 +448,17 @@ void B_clear(struct B *_B) {
     _memset(_B, 0, sizeof(struct B));
 }
 
+void B_initOptionalAttributes(struct B *_B) {
+}
+
 int B_read(void *_buffer, struct B *_B, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
 
     /* Reset all attributes to 0 in advance. */
     B_clear(_B);
+    /* Assign the optional attributes. */
+    B_initOptionalAttributes(_B);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -517,12 +527,17 @@ void PhoneNumber_clear(struct PhoneNumber *_PhoneNumber) {
     _memset(_PhoneNumber, 0, sizeof(struct PhoneNumber));
 }
 
+void PhoneNumber_initOptionalAttributes(struct PhoneNumber *_PhoneNumber) {
+}
+
 int PhoneNumber_read(void *_buffer, struct PhoneNumber *_PhoneNumber, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
 
     /* Reset all attributes to 0 in advance. */
     PhoneNumber_clear(_PhoneNumber);
+    /* Assign the optional attributes. */
+    PhoneNumber_initOptionalAttributes(_PhoneNumber);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -885,13 +900,50 @@ void Person_clear(struct Person *_Person) {
     _memset(_Person, 0, sizeof(struct Person));
 }
 
+void Person_initOptionalAttributes(struct Person *_Person) {
+    _Person->_optEnum = 0;
+
+    _Person->_optFloat = 0.0f;
+
+    _Person->_optDouble = 0.0;
+
+    _Person->_optBool = 0;
+
+    _Person->_optInt32 = 0;
+
+    _Person->_optInt64 = 0;
+
+    _Person->_optSInt32 = 0;
+
+    _Person->_optSInt64 = 0;
+
+    _Person->_optUInt32 = 0;
+
+    _Person->_optUInt64 = 0;
+
+    _Person->_optFixed32 = 0;
+
+    _Person->_optFixed64 = 0;
+
+    _Person->_optSFixed32 = 0;
+
+    _Person->_optSFixed64 = 0;
+
+    _Person->_optString_len = 0;
+
+    _Person->_optBytes_len = 0;
+
+}
+
 int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
     unsigned long long value = i;
 
     /* Reset all attributes to 0 in advance. */
     Person_clear(_Person);
+    /* Assign the optional attributes. */
+    Person_initOptionalAttributes(_Person);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -1233,7 +1285,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 84
+ * Message: Test.proto, line 85
  *******************************************************************/
 int C_write(struct C *_C, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -1269,12 +1321,17 @@ void C_clear(struct C *_C) {
     _memset(_C, 0, sizeof(struct C));
 }
 
+void C_initOptionalAttributes(struct C *_C) {
+}
+
 int C_read(void *_buffer, struct C *_C, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
 
     /* Reset all attributes to 0 in advance. */
     C_clear(_C);
+    /* Assign the optional attributes. */
+    C_initOptionalAttributes(_C);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -1302,7 +1359,7 @@ int C_read_delimited_from(void *_buffer, struct C *_C, int offset) {
 
 
 /*******************************************************************
- * Message: Test.proto, line 92
+ * Message: Test.proto, line 93
  *******************************************************************/
 int A_write(struct A *_A, void *_buffer, int offset) {
     /* Write content of each message element.*/
@@ -1338,12 +1395,17 @@ void A_clear(struct A *_A) {
     _memset(_A, 0, sizeof(struct A));
 }
 
+void A_initOptionalAttributes(struct A *_A) {
+}
+
 int A_read(void *_buffer, struct A *_A, int offset, int limit) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned long tag = i;
 
     /* Reset all attributes to 0 in advance. */
     A_clear(_A);
+    /* Assign the optional attributes. */
+    A_initOptionalAttributes(_A);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {

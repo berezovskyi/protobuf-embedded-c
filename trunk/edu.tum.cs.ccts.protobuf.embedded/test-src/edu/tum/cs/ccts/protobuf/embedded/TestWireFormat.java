@@ -107,6 +107,23 @@ public class TestWireFormat {
 			iniPersonBuilder.setName6(getRandomString(rand));
 			iniPersonBuilder.setBname(getRandomByteString(rand));
 
+			iniPersonBuilder.setOptBool(true);
+			// iniPersonBuilder.setOptString(getRandomString(rand));
+			// iniPersonBuilder.setOptBytes(getRandomByteString(rand));
+			iniPersonBuilder.setOptDouble(rand.nextDouble() * 20000 - 10000);
+			iniPersonBuilder.setOptFloat(rand.nextFloat() * 20000 - 10000);
+			iniPersonBuilder.setOptEnum(PhoneType.valueOf(rand.nextInt(2) + 1));
+			iniPersonBuilder.setOptFixed32(rand.nextInt(32000));
+			iniPersonBuilder.setOptFixed64(rand.nextLong());
+			iniPersonBuilder.setOptInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSFixed32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSFixed64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
+			iniPersonBuilder.setOptUInt64(rand.nextLong());
+
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addStrAttr(getRandomString(rand));
@@ -215,6 +232,23 @@ public class TestWireFormat {
 			iniPersonBuilder.setName6(getRandomString(rand));
 			iniPersonBuilder.setBname(getRandomByteString(rand));
 
+			// iniPersonBuilder.setOptBool(true);
+			iniPersonBuilder.setOptString(getRandomString(rand));
+			iniPersonBuilder.setOptBytes(getRandomByteString(rand));
+			iniPersonBuilder.setOptDouble(rand.nextDouble() * 20000 - 10000);
+			iniPersonBuilder.setOptFloat(rand.nextFloat() * 20000 - 10000);
+			iniPersonBuilder.setOptEnum(PhoneType.valueOf(rand.nextInt(2) + 1));
+			iniPersonBuilder.setOptFixed32(rand.nextInt(32000));
+			iniPersonBuilder.setOptFixed64(rand.nextLong());
+			// iniPersonBuilder.setOptInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSFixed32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSFixed64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
+			iniPersonBuilder.setOptUInt64(rand.nextLong());
+
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
 				iniPersonBuilder.addStrAttr(getRandomString(rand));
@@ -320,6 +354,24 @@ public class TestWireFormat {
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
 			iniPersonBuilder.setBname(getRandomByteString(rand));
+
+			iniPersonBuilder.setOptBool(true);
+			iniPersonBuilder.setOptString(getRandomString(rand));
+			iniPersonBuilder.setOptBytes(getRandomByteString(rand));
+			// iniPersonBuilder.setOptDouble(rand.nextDouble() * 20000 - 10000);
+			// iniPersonBuilder.setOptFloat(rand.nextFloat() * 20000 - 10000);
+			iniPersonBuilder.setOptEnum(PhoneType.valueOf(rand.nextInt(2) + 1));
+			iniPersonBuilder.setOptFixed32(rand.nextInt(32000));
+			iniPersonBuilder.setOptFixed64(rand.nextLong());
+			iniPersonBuilder.setOptInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSFixed32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSFixed64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSInt32(rand.nextInt(32000) - 16000);
+			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
+			iniPersonBuilder.setOptUInt64(rand.nextLong());
+
 			lBuilder.add(iniPersonBuilder);
 		}
 		executeTest(lBuilder, 0);
@@ -357,6 +409,24 @@ public class TestWireFormat {
 			iniPersonBuilder.setName5(getRandomString(rand));
 			iniPersonBuilder.setName6(getRandomString(rand));
 			iniPersonBuilder.setBname(getRandomByteString(rand));
+
+			iniPersonBuilder.setOptBool(true);
+			iniPersonBuilder.setOptString(getRandomString(rand));
+			iniPersonBuilder.setOptBytes(getRandomByteString(rand));
+			iniPersonBuilder.setOptDouble(rand.nextDouble() * 20000 - 10000);
+			iniPersonBuilder.setOptFloat(rand.nextFloat() * 20000 - 10000);
+			iniPersonBuilder.setOptEnum(PhoneType.valueOf(rand.nextInt(2) + 1));
+			iniPersonBuilder.setOptFixed32(rand.nextInt(32000));
+			// iniPersonBuilder.setOptFixed64(rand.nextLong());
+			iniPersonBuilder.setOptInt32(rand.nextInt(32000) - 16000);
+			// iniPersonBuilder.setOptInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSFixed32(rand.nextInt(32000) - 16000);
+			// iniPersonBuilder.setOptSFixed64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptSInt32(rand.nextInt(32000) - 16000);
+			// iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
+			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
+			// iniPersonBuilder.setOptUInt64(rand.nextLong());
+
 			List<Builder> lBuilder = new ArrayList<Builder>();
 			lBuilder.add(iniPersonBuilder);
 			executeTest(lBuilder, step);
@@ -585,7 +655,7 @@ public class TestWireFormat {
 	 */
 	private String getRandomString(Random rand) {
 		String name = "";
-		int size = rand.nextInt(33);
+		int size = rand.nextInt(32) + 1;
 		for (int i = 0; i < size; ++i) {
 			name += (char) (rand.nextInt(26) + 64);
 		}
@@ -596,7 +666,7 @@ public class TestWireFormat {
 	 * Returns a random byte string.
 	 */
 	private ByteString getRandomByteString(Random rand) {
-		int size = rand.nextInt(33);
+		int size = rand.nextInt(32) + 1;
 		byte[] name = new byte[size];
 		for (int i = 0; i < size; ++i) {
 			name[i] += (rand.nextInt(26) + 100);

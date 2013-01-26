@@ -34,7 +34,7 @@ unsigned long Message_get_delimited_size(void *_buffer, int offset);
  * Returns 1 (true) if buffer[offset..offset+length-1] contains a complete
  * message or 0 (false) otherwise.
  */
-int Message_can_read_delimited_from(void *_buffer, int offset, int length);
+int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length);
 
 
 /*******************************************************************
@@ -47,7 +47,7 @@ enum PhoneType {
 };
 
 /*******************************************************************
- * Message: Test.proto, line 79
+ * Message: Test.proto, line 80
  *******************************************************************/
 
 /* Maximum size of a serialized AddressBook-message, useful for buffer allocation. */
@@ -82,7 +82,7 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 
 
 /*******************************************************************
- * Message: Test.proto, line 88
+ * Message: Test.proto, line 89
  *******************************************************************/
 
 /* Maximum size of a serialized B-message, useful for buffer allocation. */
@@ -262,7 +262,7 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 
 
 /*******************************************************************
- * Message: Test.proto, line 84
+ * Message: Test.proto, line 85
  *******************************************************************/
 
 /* Maximum size of a serialized C-message, useful for buffer allocation. */
@@ -295,7 +295,7 @@ int C_read_delimited_from(void *_buffer, struct C *_C, int offset);
 
 
 /*******************************************************************
- * Message: Test.proto, line 92
+ * Message: Test.proto, line 93
  *******************************************************************/
 
 /* Maximum size of a serialized A-message, useful for buffer allocation. */
