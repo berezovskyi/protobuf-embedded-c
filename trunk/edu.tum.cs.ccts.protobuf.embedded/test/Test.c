@@ -317,6 +317,20 @@ int PhoneType_write_with_tag(enum PhoneType *_PhoneType, void *_buffer, int offs
 /*******************************************************************
  * Message: Test.proto, line 80
  *******************************************************************/
+ 
+void AddressBook_clear(struct AddressBook *_AddressBook) {
+    _memset(_AddressBook, 0, sizeof(struct AddressBook));
+}
+
+void AddressBook_init_optional_attributes(struct AddressBook *_AddressBook) {
+}
+
+int AddressBook_is_default_message(struct AddressBook *_AddressBook) {
+    return 1          && _AddressBook->_address_len == 0
+         && _AddressBook->_number == 0
+        ;
+}
+ 
 int AddressBook_write(struct AddressBook *_AddressBook, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = write_raw_varint32((1<<3)+2, _buffer, offset);
@@ -356,13 +370,6 @@ int AddressBook_write_delimited_to(struct AddressBook *_AddressBook, void *_buff
     return new_offset + shift;
 }
 
-void AddressBook_clear(struct AddressBook *_AddressBook) {
-    _memset(_AddressBook, 0, sizeof(struct AddressBook));
-}
-
-void AddressBook_initOptionalAttributes(struct AddressBook *_AddressBook) {
-}
-
 int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -370,7 +377,7 @@ int AddressBook_read(void *_buffer, struct AddressBook *_AddressBook, int offset
     /* Reset all attributes to 0 in advance. */
     AddressBook_clear(_AddressBook);
     /* Assign the optional attributes. */
-    AddressBook_initOptionalAttributes(_AddressBook);
+    AddressBook_init_optional_attributes(_AddressBook);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -409,6 +416,19 @@ int AddressBook_read_delimited_from(void *_buffer, struct AddressBook *_AddressB
 /*******************************************************************
  * Message: Test.proto, line 89
  *******************************************************************/
+ 
+void B_clear(struct B *_B) {
+    _memset(_B, 0, sizeof(struct B));
+}
+
+void B_init_optional_attributes(struct B *_B) {
+}
+
+int B_is_default_message(struct B *_B) {
+    return 1          && _B->_i == 0
+        ;
+}
+ 
 int B_write(struct B *_B, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = write_raw_varint32((1<<3)+0, _buffer, offset);
@@ -444,13 +464,6 @@ int B_write_delimited_to(struct B *_B, void *_buffer, int offset) {
     return new_offset + shift;
 }
 
-void B_clear(struct B *_B) {
-    _memset(_B, 0, sizeof(struct B));
-}
-
-void B_initOptionalAttributes(struct B *_B) {
-}
-
 int B_read(void *_buffer, struct B *_B, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -458,7 +471,7 @@ int B_read(void *_buffer, struct B *_B, int offset, int limit) {
     /* Reset all attributes to 0 in advance. */
     B_clear(_B);
     /* Assign the optional attributes. */
-    B_initOptionalAttributes(_B);
+    B_init_optional_attributes(_B);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -489,6 +502,20 @@ int B_read_delimited_from(void *_buffer, struct B *_B, int offset) {
 /*******************************************************************
  * Message: Test.proto, line 17
  *******************************************************************/
+ 
+void PhoneNumber_clear(struct PhoneNumber *_PhoneNumber) {
+    _memset(_PhoneNumber, 0, sizeof(struct PhoneNumber));
+}
+
+void PhoneNumber_init_optional_attributes(struct PhoneNumber *_PhoneNumber) {
+}
+
+int PhoneNumber_is_default_message(struct PhoneNumber *_PhoneNumber) {
+    return 1          && _PhoneNumber->_number == 0.0f
+         && _PhoneNumber->_type == 0
+        ;
+}
+ 
 int PhoneNumber_write(struct PhoneNumber *_PhoneNumber, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = write_raw_varint32((1<<3)+5, _buffer, offset);
@@ -496,6 +523,7 @@ int PhoneNumber_write(struct PhoneNumber *_PhoneNumber, void *_buffer, int offse
     offset = write_raw_little_endian32(*number_ptr, _buffer, offset);
 
     offset = PhoneType_write_with_tag(&_PhoneNumber->_type, _buffer, offset, 2);
+
     
     return offset;
 }
@@ -523,13 +551,6 @@ int PhoneNumber_write_delimited_to(struct PhoneNumber *_PhoneNumber, void *_buff
     return new_offset + shift;
 }
 
-void PhoneNumber_clear(struct PhoneNumber *_PhoneNumber) {
-    _memset(_PhoneNumber, 0, sizeof(struct PhoneNumber));
-}
-
-void PhoneNumber_initOptionalAttributes(struct PhoneNumber *_PhoneNumber) {
-}
-
 int PhoneNumber_read(void *_buffer, struct PhoneNumber *_PhoneNumber, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -537,7 +558,7 @@ int PhoneNumber_read(void *_buffer, struct PhoneNumber *_PhoneNumber, int offset
     /* Reset all attributes to 0 in advance. */
     PhoneNumber_clear(_PhoneNumber);
     /* Assign the optional attributes. */
-    PhoneNumber_initOptionalAttributes(_PhoneNumber);
+    PhoneNumber_init_optional_attributes(_PhoneNumber);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -574,6 +595,88 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
 /*******************************************************************
  * Message: Test.proto, line 22
  *******************************************************************/
+ 
+void Person_clear(struct Person *_Person) {
+    _memset(_Person, 0, sizeof(struct Person));
+}
+
+void Person_init_optional_attributes(struct Person *_Person) {
+    _Person->_optEnum = 0;
+
+    _Person->_optFloat = 0.0f;
+
+    _Person->_optDouble = 0.0;
+
+    _Person->_optBool = 0;
+
+    _Person->_optInt32 = 0;
+
+    _Person->_optInt64 = 0;
+
+    _Person->_optSInt32 = 0;
+
+    _Person->_optSInt64 = 0;
+
+    _Person->_optUInt32 = 0;
+
+    _Person->_optUInt64 = 0;
+
+    _Person->_optFixed32 = 0;
+
+    _Person->_optFixed64 = 0;
+
+    _Person->_optSFixed32 = 0;
+
+    _Person->_optSFixed64 = 0;
+
+    _Person->_optString_len = 0;
+
+    _Person->_optBytes_len = 0;
+
+    AddressBook_init_optional_attributes(&_Person->_optAb);
+}
+
+int Person_is_default_message(struct Person *_Person) {
+    return 1          && AddressBook_is_default_message(&_Person->_ab)         && _Person->_name1_len == 0
+         && _Person->_name2_len == 0
+         && _Person->_name3_len == 0
+         && _Person->_name4_len == 0
+         && _Person->_name5_len == 0
+         && _Person->_name6_len == 0
+         && _Person->_bname_len == 0
+         && _Person->_id == 0
+         && _Person->_id64 == 0
+         && _Person->_sid == 0
+         && _Person->_sid64 == 0
+         && _Person->_uid == 0
+         && _Person->_uid64 == 0
+         && _Person->_fid32 == 0
+         && _Person->_fid64 == 0
+         && _Person->_sfid32 == 0
+         && _Person->_sfid64 == 0
+         && _Person->_iq == 0.0f
+         && _Person->_iqd == 0.0
+         && _Person->_email == 0
+         && _Person->_phone == 0
+         && _Person->_optEnum == 0
+         && _Person->_optFloat == 0.0f
+         && _Person->_optDouble == 0.0
+         && _Person->_optBool == 0
+         && _Person->_optInt32 == 0
+         && _Person->_optInt64 == 0
+         && _Person->_optSInt32 == 0
+         && _Person->_optSInt64 == 0
+         && _Person->_optUInt32 == 0
+         && _Person->_optUInt64 == 0
+         && _Person->_optFixed32 == 0
+         && _Person->_optFixed64 == 0
+         && _Person->_optSFixed32 == 0
+         && _Person->_optSFixed64 == 0
+         && _Person->_optString_len == 0
+         && _Person->_optBytes_len == 0
+         && AddressBook_is_default_message(&_Person->_optAb)        ;
+}
+ 
 int Person_write(struct Person *_Person, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = AddressBook_write_with_tag(&_Person->_ab, _buffer, offset, 38);
@@ -650,6 +753,7 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     offset = write_raw_byte(_Person->_email, _buffer, offset);
 
     offset = PhoneType_write_with_tag(&_Person->_phone, _buffer, offset, 10);
+
     int strAttr_cnt;
     for (strAttr_cnt = 0; strAttr_cnt < _Person->_strAttr_repeated_len; ++ strAttr_cnt) {
         offset = write_raw_varint32((11<<3)+2, _buffer, offset);
@@ -768,6 +872,7 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
     }
 
 
+
     /* Write the optional attribute only if it is different than the default value. */
     if(_Person->_optEnum != 0) {
         offset = PhoneType_write_with_tag(&_Person->_optEnum, _buffer, offset, 39);
@@ -869,6 +974,10 @@ int Person_write(struct Person *_Person, void *_buffer, int offset) {
         offset = write_raw_varint32(_Person->_optBytes_len, _buffer, offset);
         offset = write_raw_bytes(_Person->_optBytes, _Person->_optBytes_len, _buffer, offset);
     }
+    /* Write the optional attribute only if it is different than the default value. */
+    if(!AddressBook_is_default_message(&_Person->_optAb)) {
+        offset = AddressBook_write_with_tag(&_Person->_optAb, _buffer, offset, 55);
+    }
     
     return offset;
 }
@@ -896,45 +1005,6 @@ int Person_write_delimited_to(struct Person *_Person, void *_buffer, int offset)
     return new_offset + shift;
 }
 
-void Person_clear(struct Person *_Person) {
-    _memset(_Person, 0, sizeof(struct Person));
-}
-
-void Person_initOptionalAttributes(struct Person *_Person) {
-    _Person->_optEnum = 0;
-
-    _Person->_optFloat = 0.0f;
-
-    _Person->_optDouble = 0.0;
-
-    _Person->_optBool = 0;
-
-    _Person->_optInt32 = 0;
-
-    _Person->_optInt64 = 0;
-
-    _Person->_optSInt32 = 0;
-
-    _Person->_optSInt64 = 0;
-
-    _Person->_optUInt32 = 0;
-
-    _Person->_optUInt64 = 0;
-
-    _Person->_optFixed32 = 0;
-
-    _Person->_optFixed64 = 0;
-
-    _Person->_optSFixed32 = 0;
-
-    _Person->_optSFixed64 = 0;
-
-    _Person->_optString_len = 0;
-
-    _Person->_optBytes_len = 0;
-
-}
-
 int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -943,7 +1013,7 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
     /* Reset all attributes to 0 in advance. */
     Person_clear(_Person);
     /* Assign the optional attributes. */
-    Person_initOptionalAttributes(_Person);
+    Person_init_optional_attributes(_Person);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -1268,6 +1338,10 @@ int Person_read(void *_buffer, struct Person *_Person, int offset, int limit) {
                 for(i = 0; i < tag; ++ i) 
                     offset = read_raw_byte((_Person->_optBytes + i), _buffer, offset);
                 break;
+            /* tag of: _Person._optAb */ 
+            case 55 :
+                offset = AddressBook_read_delimited_from(_buffer, &_Person->_optAb, offset);
+                break;
         }
     }
     
@@ -1287,6 +1361,18 @@ int Person_read_delimited_from(void *_buffer, struct Person *_Person, int offset
 /*******************************************************************
  * Message: Test.proto, line 85
  *******************************************************************/
+ 
+void C_clear(struct C *_C) {
+    _memset(_C, 0, sizeof(struct C));
+}
+
+void C_init_optional_attributes(struct C *_C) {
+}
+
+int C_is_default_message(struct C *_C) {
+    return 1          && B_is_default_message(&_C->_b)        ;
+}
+ 
 int C_write(struct C *_C, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = B_write_with_tag(&_C->_b, _buffer, offset, 1);
@@ -1317,13 +1403,6 @@ int C_write_delimited_to(struct C *_C, void *_buffer, int offset) {
     return new_offset + shift;
 }
 
-void C_clear(struct C *_C) {
-    _memset(_C, 0, sizeof(struct C));
-}
-
-void C_initOptionalAttributes(struct C *_C) {
-}
-
 int C_read(void *_buffer, struct C *_C, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -1331,7 +1410,7 @@ int C_read(void *_buffer, struct C *_C, int offset, int limit) {
     /* Reset all attributes to 0 in advance. */
     C_clear(_C);
     /* Assign the optional attributes. */
-    C_initOptionalAttributes(_C);
+    C_init_optional_attributes(_C);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -1361,6 +1440,18 @@ int C_read_delimited_from(void *_buffer, struct C *_C, int offset) {
 /*******************************************************************
  * Message: Test.proto, line 93
  *******************************************************************/
+ 
+void A_clear(struct A *_A) {
+    _memset(_A, 0, sizeof(struct A));
+}
+
+void A_init_optional_attributes(struct A *_A) {
+}
+
+int A_is_default_message(struct A *_A) {
+    return 1          && B_is_default_message(&_A->_b)        ;
+}
+ 
 int A_write(struct A *_A, void *_buffer, int offset) {
     /* Write content of each message element.*/
     offset = B_write_with_tag(&_A->_b, _buffer, offset, 1);
@@ -1391,13 +1482,6 @@ int A_write_delimited_to(struct A *_A, void *_buffer, int offset) {
     return new_offset + shift;
 }
 
-void A_clear(struct A *_A) {
-    _memset(_A, 0, sizeof(struct A));
-}
-
-void A_initOptionalAttributes(struct A *_A) {
-}
-
 int A_read(void *_buffer, struct A *_A, int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -1405,7 +1489,7 @@ int A_read(void *_buffer, struct A *_A, int offset, int limit) {
     /* Reset all attributes to 0 in advance. */
     A_clear(_A);
     /* Assign the optional attributes. */
-    A_initOptionalAttributes(_A);
+    A_init_optional_attributes(_A);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {

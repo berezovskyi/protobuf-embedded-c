@@ -123,6 +123,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
 			iniPersonBuilder.setOptUInt64(rand.nextLong());
+			iniPersonBuilder.setOptAb(address);
 
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -248,6 +249,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
 			iniPersonBuilder.setOptUInt64(rand.nextLong());
+			iniPersonBuilder.setOptAb(address);
 
 			repeatedNr = rand.nextInt(33);
 			for (int i = 0; i < repeatedNr; ++i) {
@@ -371,6 +373,7 @@ public class TestWireFormat {
 			iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
 			iniPersonBuilder.setOptUInt64(rand.nextLong());
+			iniPersonBuilder.setOptAb(address);
 
 			lBuilder.add(iniPersonBuilder);
 		}
@@ -426,6 +429,7 @@ public class TestWireFormat {
 			// iniPersonBuilder.setOptSInt64(rand.nextLong() - 10000000000L);
 			iniPersonBuilder.setOptUInt32(rand.nextInt(32000));
 			// iniPersonBuilder.setOptUInt64(rand.nextLong());
+			iniPersonBuilder.setOptAb(address);
 
 			List<Builder> lBuilder = new ArrayList<Builder>();
 			lBuilder.add(iniPersonBuilder);

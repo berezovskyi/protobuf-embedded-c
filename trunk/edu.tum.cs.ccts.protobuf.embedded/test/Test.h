@@ -153,7 +153,7 @@ int PhoneNumber_read_delimited_from(void *_buffer, struct PhoneNumber *_PhoneNum
  *******************************************************************/
 
 /* Maximum size of a serialized Person-message, useful for buffer allocation. */
-#define MAX_Person_SIZE 19152
+#define MAX_Person_SIZE 19155
 
 /* Structure that holds a deserialized Person-message. */
 struct Person {
@@ -238,6 +238,7 @@ struct Person {
   char _optString[MAX_STRING_LEN];
   int _optBytes_len;
   char _optBytes[MAX_BYTES_LEN];
+  struct AddressBook _optAb;
 };
 /*
  * Serialize a Person-message into the given buffer at offset and return

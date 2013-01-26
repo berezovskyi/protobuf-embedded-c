@@ -403,6 +403,19 @@ messageDecl(name, elements, filename, line, maxsize, empty, bigvalues) ::= <<
 /*******************************************************************
  * Message: $filename$.proto, line $line$
  *******************************************************************/
+ 
+$if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
+    _memset(_$name$, 0, sizeof(struct $name$));
+}$endif$
+
+$if(empty)$$else$void $name$_init_optional_attributes(struct $name$ *_$name$) {
+    $elements:initOptional(element=it);separator="\n"$
+}$endif$
+
+int $name$_is_default_message(struct $name$ *_$name$) {
+    return 1 $elements:isDefaultValue(element=it);separator=""$        ;
+}
+ 
 int $name$_write($if(empty)$$else$struct $name$ *_$name$, $endif$void *_buffer, int offset) {
     /* Write content of each message element.*/
     $elements:messageElementWriteTo(element=it);separator="\n"$
@@ -433,14 +446,6 @@ int $name$_write_delimited_to($if(empty)$$else$struct $name$ *_$name$, $endif$vo
     return new_offset + shift;
 }
 
-$if(empty)$$else$void $name$_clear(struct $name$ *_$name$) {
-    _memset(_$name$, 0, sizeof(struct $name$));
-}$endif$
-
-$if(empty)$$else$void $name$_initOptionalAttributes(struct $name$ *_$name$) {
-    $elements:initOptional(element=it);separator="\n"$
-}$endif$
-
 int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$int offset, int limit) {
     unsigned int i = 0;
     unsigned long tag = i;
@@ -449,7 +454,7 @@ int $name$_read(void *_buffer, $if(empty)$$else$struct $name$ *_$name$, $endif$i
     $if(empty)$$else$    /* Reset all attributes to 0 in advance. */
     $name$_clear(_$name$);
     /* Assign the optional attributes. */
-    $name$_initOptionalAttributes(_$name$);$endif$
+    $name$_init_optional_attributes(_$name$);$endif$
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
@@ -471,6 +476,233 @@ int $name$_read_delimited_from(void *_buffer, $if(empty)$$else$struct $name$ *_$
     return offset + size;
 }
 
+>>
+
+isDefaultValue(element) ::= <<
+$isDefaultInt32(element)$
+$isDefaultInt64(element)$
+$isDefaultSInt32(element)$
+$isDefaultSInt64(element)$
+$isDefaultUInt32(element)$
+$isDefaultUInt64(element)$
+$isDefaultFixed32(element)$
+$isDefaultFixed64(element)$
+$isDefaultSFixed32(element)$
+$isDefaultSFixed64(element)$
+$isDefaultFloat(element)$
+$isDefaultDouble(element)$
+$isDefaultBool(element)$
+$isDefaultEnum(element)$
+$isDefaultString(element)$
+$isDefaultBytes(element)$
+$isDefaultMessage(element)$
+>>
+
+isDefaultInt64(element) ::= <<
+$if(int64Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultString(element) ::= <<
+$if(stringMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && //TODO: Determine the if the strings are equal.
+// _$name$->_$element.name$ == {$element.def$}
+$else$
+         && _$name$->_$element.name$_len == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultBytes(element) ::= <<
+$if(bytesMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && //TODO: Determine the if the strings are equal.
+// _$name$->_$element.name$ == {$element.def$}
+$else$
+         && _$name$->_$element.name$_len == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultEnum(element) ::= <<
+$if(enumMap.(element.typeClass))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultMessage(element) ::= <<
+$if(!enumMap.(element.typeClass))$$if(!typeMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && //TODO: handle the default case for the embedded messages.
+$else$
+         && $element.typeName$_is_default_message(&_$name$->_$element.name$)
+$endif$
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultBool(element) ::= <<
+$if(boolMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultFloat(element) ::= <<
+$if(floatMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0.0f
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultDouble(element) ::= <<
+$if(doubleMap.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0.0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultInt32(element) ::= <<
+$if(int32Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultSInt32(element) ::= <<
+$if(sint32Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultSInt64(element) ::= <<
+$if(sint64Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultUInt32(element) ::= <<
+$if(uint32Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultUInt64(element) ::= <<
+$if(uint64Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultFixed32(element) ::= <<
+$if(fixed32Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultFixed64(element) ::= <<
+$if(fixed64Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultSFixed32(element) ::= <<
+$if(sfixed32Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
+>>
+
+isDefaultSFixed64(element) ::= <<
+$if(sfixed64Map.(element.typeName))$
+$if(!arrayModifiers.(element.modifier))$
+$if(element.def)$
+         && _$name$->_$element.name$ == $element.def$
+$else$
+         && _$name$->_$element.name$ == 0
+$endif$
+$endif$
+$endif$
 >>
 
 initOptional(element) ::= <<
@@ -542,7 +774,7 @@ $if(!enumMap.(element.typeClass))$$if(!typeMap.(element.typeName))$
 $if(element.def)$
 //TODO: handle the default case for the embedded messages.
 $else$
-$name$_initOptionalAttributes(&_$name$->_$element.name$);
+$element.typeName$_init_optional_attributes(&_$name$->_$element.name$);
 $endif$
 $endif$
 $endif$
@@ -921,11 +1153,31 @@ $writeByte(element)$
 $writeBool(element)$
 $writeFloat(element)$
 $writeDouble(element)$
-$writeMessageEnum(element)$
+$writeEnum(element)$
+$writeMessage(element)$
 >>
 
-writeMessageEnum(element) ::= <<
-$if(!typeMap.(element.typeName))$
+writeMessage(element) ::= <<
+$if(!enumMap.(element.typeClass))$$if(!typeMap.(element.typeName))$
+$if(arrayModifiers.(element.modifier))$
+int $element.name$_cnt;
+for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {
+    offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$[$element.name$_cnt], _buffer, offset, $element.tag$);
+}
+$elseif(optionalModifiers.(element.modifier))$
+/* Write the optional attribute only if it is different than the default value. */
+if(!$element.typeName$_is_default_message(&_$name$-\>_$element.name$)) {
+    offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$, _buffer, offset, $element.tag$);
+}
+$else$
+offset = $element.typeName$_write_with_tag(&_$name$-\>_$element.name$, _buffer, offset, $element.tag$);
+$endif$
+$endif$
+$endif$
+>>
+
+writeEnum(element) ::= <<
+$if(enumMap.(element.typeClass))$
 $if(arrayModifiers.(element.modifier))$
 int $element.name$_cnt;
 for ($element.name$_cnt = 0; $element.name$_cnt < _$name$-\>_$element.name$_repeated_len; ++ $element.name$_cnt) {

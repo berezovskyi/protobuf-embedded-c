@@ -74,7 +74,7 @@ message Person {
   optional sfixed64 optSFixed64 = 52;
   optional string optString = 53;
   optional bytes optBytes = 54;
-  //optional AddressBook optAb = 55;
+  optional AddressBook optAb = 55;
 }
 
 message AddressBook {
