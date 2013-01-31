@@ -11,6 +11,13 @@
  *                                                                 *
  * Do not edit.                                                    *
  *******************************************************************/
+ 
+#ifndef _Test_H
+#define _Test_H
+
+#ifdef __cplusplus
+  extern "C" {
+#endif
 
 
 #define MAX_REPEATED_LEN 100
@@ -326,3 +333,10 @@ int A_write_with_tag(struct A *_A, void *_buffer, int offset, int tag);
  * Note: All fields in _A will be reset to 0 before _buffer is interpreted.
  */
 int A_read_delimited_from(void *_buffer, struct A *_A, int offset);
+
+
+#ifdef _cplusplus
+  }
+#endif
+
+#endif

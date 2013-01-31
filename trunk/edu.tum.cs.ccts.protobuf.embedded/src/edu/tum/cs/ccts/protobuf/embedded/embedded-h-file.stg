@@ -62,6 +62,13 @@ proto(packageDecl, importDecls, declarations, filename, max_repeated_length, max
  *                                                                 *
  * Do not edit.                                                    *
  *******************************************************************/
+ 
+#ifndef _$filename$_H
+#define _$filename$_H
+
+#ifdef __cplusplus
+  extern "C" {
+#endif
 
 $importDecls; separator="\n"$
 
@@ -90,6 +97,13 @@ int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int leng
 
 
 $declarations; separator="\n\n"$
+
+#ifdef _cplusplus
+  }
+#endif
+
+#endif
+
 >>
 
 packageDecl(qualifiedID) ::= <<$qualifiedID$>>
@@ -162,4 +176,3 @@ $endif$;
 >>
 
 qualifiedID(ids) ::= <<$ids; separator="."$>>
-
