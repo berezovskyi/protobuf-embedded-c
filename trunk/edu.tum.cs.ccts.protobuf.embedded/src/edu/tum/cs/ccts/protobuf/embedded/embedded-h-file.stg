@@ -98,7 +98,7 @@ int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int leng
 
 $declarations; separator="\n\n"$
 
-#ifdef _cplusplus
+#ifdef __cplusplus
   }
 #endif
 
