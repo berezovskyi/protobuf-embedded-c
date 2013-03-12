@@ -47,7 +47,7 @@ import org.antlr.stringtemplate.language.DefaultTemplateLexer;
  */
 public class Protoc {
 
-	public static final String VERSION = "0.3 (2013-01-31)";
+	public static final String VERSION = "1.0M4 (2013-03-31)";
 
 	private static boolean debug = false;
 
@@ -125,10 +125,15 @@ public class Protoc {
 		if (name.contains(".")) {
 			name = name.substring(0, name.lastIndexOf("."));
 		}
-		generate("embedded-h-file.stg", new File(outputDirectory, name + ".h"),
-				tokens, tree, name, checker.topologicalOrder);
-		generate("embedded-c-file.stg", new File(outputDirectory, name + ".c"),
-				tokens, tree, name, checker.topologicalOrder);
+		// generate("embedded-h-file.stg", new File(outputDirectory, name +
+		// ".h"),
+		// tokens, tree, name, checker.topologicalOrder);
+		// generate("embedded-c-file.stg", new File(outputDirectory, name +
+		// ".c"),
+		// tokens, tree, name, checker.topologicalOrder);
+
+		final EmbeddedCGenerator generator = new EmbeddedCGenerator();
+		generator.doGenerate(outputDirectory, name, tree);
 	}
 
 	private static void generate(String templateFilename, File outFile,
