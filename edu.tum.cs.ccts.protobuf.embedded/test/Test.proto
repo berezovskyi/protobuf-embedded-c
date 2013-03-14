@@ -16,7 +16,7 @@ enum PhoneType {
 
 message PhoneNumber {
   required float number = 1;
-  required PhoneType type = 2;
+  required PhoneType type = 2 [default = MOBILE];
 }
 
 message Person {
@@ -40,7 +40,7 @@ message Person {
   required sfixed64 sfid64 = 34;
   required float iq = 8;
   required double iqd = 18;
-  required bool email = 9;
+  required bool email = 9 [default = true];
   required PhoneType phone = 10;
   repeated string strAttr = 11;
   repeated bytes bAttr = 37;

@@ -141,16 +141,16 @@ annotationDecl
 	;
 
 messageElement
-	:	^(ASSIGN MODIFIER (t=TYPE | t=ID) n=ID INTEGER )
+	:	^(ASSIGN MODIFIER (t=TYPE | t=ID) n=ID tagVal=INTEGER (defaultVal=(INTEGER | REAL | STRING | ID))?)
 	   {
-	     int tag = Integer.parseInt($INTEGER.text);
+	     int tag = Integer.parseInt($tagVal.text);
 	     if (tag <= 0 || tag > 4095)
-	       constraintError($INTEGER.line, "tag: " + tag + " out of valid range [1..4095]");
+	       constraintError($tagVal.line, "tag: " + tag + " out of valid range [1..4095]");
 	     if (nameScope.contains($n.text))
          constraintError($n.line, "duplicate element name " + $n.text);
 	     nameScope.add($n.text);
 	     if (valueScope.contains(tag))
-         constraintError($INTEGER.line, "duplicate tag value " + tag);
+         constraintError($tagVal.line, "duplicate tag value " + tag);
        valueScope.add(tag);
        //if (!dataTypes.contains($t.text) && globalNameScope.contains($t.text))
          //constraintError($t.line, "unsupported data type: " + $t.text + "\nData types must be natives, enums or embedded messages");

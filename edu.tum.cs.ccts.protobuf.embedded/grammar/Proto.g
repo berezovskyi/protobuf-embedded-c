@@ -91,7 +91,7 @@ annotationDecl
 	;
 
 messageElement
-	:	MODIFIER (TYPE | ID) ID ASSIGN^ INTEGER ';'!
+	:	MODIFIER (TYPE | ID) ID ASSIGN^ INTEGER ('['! DEFAULT! ASSIGN! (INTEGER | REAL | STRING | ID) ']'!)? ';'!
 	;
 
 qualifiedID
