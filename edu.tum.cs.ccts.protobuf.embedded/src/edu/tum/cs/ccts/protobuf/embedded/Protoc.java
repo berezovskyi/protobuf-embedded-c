@@ -19,21 +19,11 @@ package edu.tum.cs.ccts.protobuf.embedded;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 
 /**
  * A protocol buffers command-line compiler that generates c-files and c-headers
@@ -136,28 +126,28 @@ public class Protoc {
 		generator.doGenerate(outputDirectory, name, tree);
 	}
 
-	private static void generate(String templateFilename, File outFile,
-			CommonTokenStream tokens, CommonTree tree, String protoFilename,
-			HashMap<String, Integer> topologicalOrder)
-			throws FileNotFoundException, IOException, RecognitionException {
-		// Load string template group file.
-		final InputStream in = Protoc.class
-				.getResourceAsStream(templateFilename);
-		final Reader reader = new InputStreamReader(in);
-		final StringTemplateGroup templates = new StringTemplateGroup(reader,
-				DefaultTemplateLexer.class);
-		// Walk AST to generate templates.
-		final CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
-		nodes.setTokenStream(tokens);
-		final EmbeddedCGen walker = new EmbeddedCGen(nodes);
-		walker.setTemplateLib(templates);
-		EmbeddedCGen.proto_return proto = walker.proto(protoFilename,
-				topologicalOrder);
-		// Emit File.
-		final String result = proto.getTemplate().toString();
-		if (debug) {
-			System.out.println(result);
-		}
-		new FileOutputStream(outFile).write(result.getBytes());
-	}
+	// private static void generate(String templateFilename, File outFile,
+	// CommonTokenStream tokens, CommonTree tree, String protoFilename,
+	// HashMap<String, Integer> topologicalOrder)
+	// throws FileNotFoundException, IOException, RecognitionException {
+	// // Load string template group file.
+	// final InputStream in = Protoc.class
+	// .getResourceAsStream(templateFilename);
+	// final Reader reader = new InputStreamReader(in);
+	// final StringTemplateGroup templates = new StringTemplateGroup(reader,
+	// DefaultTemplateLexer.class);
+	// // Walk AST to generate templates.
+	// final CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
+	// nodes.setTokenStream(tokens);
+	// final EmbeddedCGen walker = new EmbeddedCGen(nodes);
+	// walker.setTemplateLib(templates);
+	// EmbeddedCGen.proto_return proto = walker.proto(protoFilename,
+	// topologicalOrder);
+	// // Emit File.
+	// final String result = proto.getTemplate().toString();
+	// if (debug) {
+	// System.out.println(result);
+	// }
+	// new FileOutputStream(outFile).write(result.getBytes());
+	// }
 }
