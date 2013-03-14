@@ -35,7 +35,7 @@ class EmbeddedCGenerator {
 		  extern "C" {
 		#endif
 		
-		«FOR i : includes(tree)»
+		«FOR i : tree.includes»
 			#include «i»
 		«ENDFOR»
 		
@@ -43,13 +43,30 @@ class EmbeddedCGenerator {
 		
 		// ... iterate over all children (and list their respective children) 
 		«FOR c : tree.children as List<CommonTree>»
-			«c.text» «c.children»
+			«c.text» «c.childText(".")»
 		«ENDFOR»
 		
 		// ... access child node with a certain token type (e.g. PACKAGE)
 		«tree.getFirstChildWithType(ProtoParser::PACKAGE)»
 		
+		// all options
+		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
+			«t.childText(" ")»
+		«ENDFOR»
 	'''
+	
+	
+	def String childText(CommonTree tree, String separator) {
+		if (tree.childTrees == null)
+			return tree.text
+		tree.childTrees.map[it.childText("")].reduce(a, b | a + separator + b)
+	}
+	
+	def childTrees(CommonTree tree) {
+		tree.children as List<CommonTree>
+	}
+
+
 
 
 	def CharSequence compileImplementation(CommonTree tree, String name) '''
