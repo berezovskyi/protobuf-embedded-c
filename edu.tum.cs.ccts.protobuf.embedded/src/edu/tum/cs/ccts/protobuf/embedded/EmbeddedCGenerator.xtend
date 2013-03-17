@@ -1,10 +1,11 @@
 package edu.tum.cs.ccts.protobuf.embedded
 
 import java.io.File
-import org.antlr.runtime.tree.CommonTree
 import java.io.FileWriter
-import java.util.HashSet
 import java.util.List
+import org.antlr.runtime.tree.CommonTree
+
+import static extension edu.tum.cs.ccts.protobuf.embedded.TreeUtils.*
 
 class EmbeddedCGenerator {
 	
@@ -35,9 +36,30 @@ class EmbeddedCGenerator {
 		  extern "C" {
 		#endif
 		
-		«FOR i : tree.includes»
-			#include «i»
+		«FOR d : tree.childTrees.filter[it.type == ProtoParser::ANNOTATION]»
+			«d.getDefine»
 		«ENDFOR»
+		
+		/*******************************************************************
+		 * General functions
+		 *******************************************************************/
+		
+		/*
+		 * returns the size of a length delimited message which also 
+		 * contains the first bytes for the length encoding.
+		 */
+		unsigned long Message_get_delimited_size(void *_buffer, int offset);
+		
+		/*
+		 * Tests whether a message can be completely read from the given buffer at
+		 * the offset. The bytes [offset..offset+length-1] are interpreted.
+		 *
+		 * Returns 1 (true) if buffer[offset..offset+length-1] contains a complete
+		 * message or 0 (false) otherwise.
+		 */
+		int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length);
+		
+		
 		
 		// ... some examples for accessing nodes in a CommonTree
 		
@@ -47,25 +69,29 @@ class EmbeddedCGenerator {
 		«ENDFOR»
 		
 		// ... access child node with a certain token type (e.g. PACKAGE)
-		«tree.getFirstChildWithType(ProtoParser::PACKAGE)»
+		«tree.getFirstChildWithType(ProtoParser::ANNOTATION)»
 		
 		// all options
 		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
 			«t.childText(" ")»
 		«ENDFOR»
+		
+		#ifdef __cplusplus
+		  }
+		#endif
+		
+		#endif
 	'''
 	
 	
-	def String childText(CommonTree tree, String separator) {
-		if (tree.childTrees == null)
-			return tree.text
-		tree.childTrees.map[it.childText("")].reduce(a, b | a + separator + b)
+	def getDefine(CommonTree d) {
+		var define = "#define "
+		
+		val literal = d.children.get(0) as CommonTree
+		val number = d.children.get(1) as CommonTree
+		define = define + literal.text.toUpperCase + " "
+		define = define + number.text
 	}
-	
-	def childTrees(CommonTree tree) {
-		tree.children as List<CommonTree>
-	}
-
 
 
 
@@ -84,10 +110,8 @@ class EmbeddedCGenerator {
 		 *******************************************************************/
 		 
 		#include "«name».h"
-		«FOR i : includes(tree)»
-			#include «i»
-		«ENDFOR»
 	'''
+	
 	
 	/**
 	 * Creates the given file and writes the given contents to it.
@@ -97,17 +121,5 @@ class EmbeddedCGenerator {
 		writer.write(contents.toString)
 		writer.close
 	}
-	
-	/**
-	 * Collects a set of necessary includes for this AST tree.
-	 */
-	def includes(CommonTree tree) {
-		val imports = new HashSet<String>()
-		// ... remove following 2 lines of test code and implement!
-		imports += "api1.h"
-		imports += "api2.h"
-		return imports
-	}
 	 
-	
 }
