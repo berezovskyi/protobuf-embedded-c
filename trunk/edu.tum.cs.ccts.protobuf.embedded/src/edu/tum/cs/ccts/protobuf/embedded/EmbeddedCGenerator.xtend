@@ -24,13 +24,13 @@ class EmbeddedCGenerator {
 		 * Technische Universitaet Muenchen                                *
 		 * http://www4.in.tum.de/                                          *
 		 *                                                                 *
-		 * Source : «name».proto
+		 * Source : «name.toFirstUpper».proto
 		 *                                                                 *
 		 * Do not edit.                                                    *
 		 *******************************************************************/
 
-		#ifndef _«name»_H
-		#define _«name»_H
+		#ifndef _«name.toFirstUpper»_H
+		#define _«name.toFirstUpper»_H
 		
 		#ifdef __cplusplus
 		  extern "C" {
@@ -60,7 +60,15 @@ class EmbeddedCGenerator {
 		int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length);
 		
 		
+		/*******************************************************************
+		 * Enumeration: «name.toFirstUpper».proto
+		 *******************************************************************/
+		 «FOR e : tree.childTrees.filter[it.text == "enum"]»
+			«e.getEnum»
+		«ENDFOR»	
 		
+		
+			 
 		// ... some examples for accessing nodes in a CommonTree
 		
 		// ... iterate over all children (and list their respective children) 
@@ -82,6 +90,33 @@ class EmbeddedCGenerator {
 		
 		#endif
 	'''
+	
+	def getEnum(CommonTree e) { 
+		var enumValue = new StringBuilder()
+		enumValue.append("enum ");
+		
+		val name = e.children.get(0) as CommonTree
+		
+		enumValue.append(name + " {\n");
+		
+		val indent = "    "
+		var i = 1;
+		while(i < e.children.size()-1) {
+			val value = (e.children.get(i) as CommonTree).children.get(0) as CommonTree
+			val id = (e.children.get(i) as CommonTree).children.get(1) as CommonTree
+			
+			enumValue.append(indent + "_" + value.text + " = " + id.text + ",\n")
+			
+			i = i + 1
+		}  
+		val value = (e.children.get(i) as CommonTree).children.get(0) as CommonTree
+		val id = (e.children.get(i) as CommonTree).children.get(1) as CommonTree
+			
+		enumValue.append(indent + "_" + value.text + " = " + id.text + "\n")
+		enumValue.append("}")
+		
+		enumValue.toString
+	}
 	
 	
 	def getDefine(CommonTree d) {
