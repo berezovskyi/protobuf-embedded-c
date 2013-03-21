@@ -24,6 +24,8 @@ class EmbeddedCGenerator {
   								"string"->"char",
   								"bytes"->"char"
   	);
+  	
+  	val enumSet = newHashSet()
   
     val arrayTypes = newHashMap(  "string"->"[MAX_STRING_LENGTH]", 
     							  "bytes"->"[MAX_BYTES_LENGTH]"
@@ -86,6 +88,7 @@ class EmbeddedCGenerator {
 		 *******************************************************************/
 		 «e.getEnum»
 		 
+		 
 		«ENDFOR»	
 		
 		
@@ -118,6 +121,12 @@ class EmbeddedCGenerator {
 		
 		
 		«ENDFOR»
+		
+		#ifdef __cplusplus
+		  }
+		#endif
+		
+		#endif
 «««			 
 «««		// ... some examples for accessing nodes in a CommonTree
 «««		
@@ -133,12 +142,7 @@ class EmbeddedCGenerator {
 «««		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
 «««			«t.childText(" ")»
 «««		«ENDFOR»
-		
-		#ifdef __cplusplus
-		  }
-		#endif
-		
-		#endif
+
 	'''
 	
 	
@@ -167,8 +171,13 @@ class EmbeddedCGenerator {
 			
 			var cType = typeMap.get(type.text);
 			
-			if (cType == null)
-				cType = "struct " + type.text;
+			if (cType == null) {
+				if (enumSet.contains(type.text)) {
+					cType = "enum " + type.text;
+				}else {
+					cType = "struct " + type.text;	
+				}
+			}
 				
 			var repValue = ""
 			if (modifier.text.equals("repeated")) {
@@ -196,7 +205,7 @@ class EmbeddedCGenerator {
 			
 			i = i + 1
 		}  
-		messageValue.append("}")
+		messageValue.append("};")
 		
 		messageValue.toString
 	}
@@ -209,6 +218,7 @@ class EmbeddedCGenerator {
 		val name = e.children.get(0) as CommonTree
 		
 		enumValue.append(name + " {\n");
+		enumSet.add(name.text);
 		
 		val indent = "    "
 		var i = 1;
@@ -224,7 +234,7 @@ class EmbeddedCGenerator {
 		val id = (e.children.get(i) as CommonTree).children.get(1) as CommonTree
 			
 		enumValue.append(indent + "_" + value.text + " = " + id.text + "\n")
-		enumValue.append("}")
+		enumValue.append("};")
 		
 		enumValue.toString
 	}
