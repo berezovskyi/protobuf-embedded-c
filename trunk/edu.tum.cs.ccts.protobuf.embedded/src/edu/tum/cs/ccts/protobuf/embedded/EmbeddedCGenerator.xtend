@@ -2,12 +2,32 @@ package edu.tum.cs.ccts.protobuf.embedded
 
 import java.io.File
 import java.io.FileWriter
-import java.util.List
 import org.antlr.runtime.tree.CommonTree
 
 import static extension edu.tum.cs.ccts.protobuf.embedded.TreeUtils.*
 
 class EmbeddedCGenerator {
+	
+	val typeMap = newHashMap(   "double"->"double",
+  							    "float"->"float",
+  								"int32"->"signed long",
+  								"int64"->"signed long long",
+  								"uint32"->"unsigned long",
+  								"uint64"->"unsigned long long",
+  								"sint32"->"signed long",
+  								"sint64"->"signed long long",
+  								"fixed32"->"unsigned long",
+  								"fixed64"->"unsigned long long",
+  								"sfixed32"->"signed long",
+  								"sfixed64"->"signed long long",
+  								"bool"->"char",
+  								"string"->"char",
+  								"bytes"->"char"
+  	);
+  
+    val arrayTypes = newHashMap(  "string"->"[MAX_STRING_LENGTH]", 
+    							  "bytes"->"[MAX_BYTES_LENGTH]"
+    ); 
 	
 	def doGenerate(File outputDirectory, String name, CommonTree tree) {
 		generateFile(new File(outputDirectory, name + ".h"), tree.compileHeader(name))
@@ -60,29 +80,59 @@ class EmbeddedCGenerator {
 		int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length);
 		
 		
-		/*******************************************************************
-		 * Enumeration: «name.toFirstUpper».proto
+		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
+		 /*******************************************************************
+		 * Enumerations: «name.toFirstUpper».proto
 		 *******************************************************************/
-		 «FOR e : tree.childTrees.filter[it.text == "enum"]»
-			«e.getEnum»
+		 «e.getEnum»
+		 
 		«ENDFOR»	
 		
 		
-			 
-		// ... some examples for accessing nodes in a CommonTree
+		«FOR m : tree.childTrees.filter[it.type == ProtoParser::MESSAGE]»
+		/*******************************************************************
+		 * Message: «name.toFirstUpper».proto
+		 *******************************************************************/
+		«m.getMessage»
 		
-		// ... iterate over all children (and list their respective children) 
-		«FOR c : tree.children as List<CommonTree>»
-			«c.text» «c.childText(".")»
+		/*
+		 * Serialize a Person-message into the given buffer at offset and return
+		 * new offset for optional next message.
+		 */
+		int «m.getMessageName»_write_delimited_to(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset);
+		
+		/*
+		 * Serialize a Person-message together with its tag into the given buffer 
+		 * at offset and return new offset for optional next message.
+		 * Is useful if a Person-message is embedded in another message.
+		 */
+		int «m.getMessageName»_write_with_tag(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset, int tag);
+		
+		/*
+		 * Deserialize a Person-message from the given buffer at offset and return
+		 * new offset for optional next message.
+		 *
+		 * Note: All fields in _Person will be reset to 0 before _buffer is interpreted.
+		 */
+		int «m.getMessageName»_read_delimited_from(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset);
+		
+		
 		«ENDFOR»
-		
-		// ... access child node with a certain token type (e.g. PACKAGE)
-		«tree.getFirstChildWithType(ProtoParser::ANNOTATION)»
-		
-		// all options
-		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
-			«t.childText(" ")»
-		«ENDFOR»
+«««			 
+«««		// ... some examples for accessing nodes in a CommonTree
+«««		
+«««		// ... iterate over all children (and list their respective children) 
+«««		«FOR c : tree.children as List<CommonTree>»
+«««			«c.text» «c.childText(".")»
+«««		«ENDFOR»
+«««		
+«««		// ... access child node with a certain token type (e.g. PACKAGE)
+«««		«tree.getFirstChildWithType(ProtoParser::ANNOTATION)»
+«««		
+«««		// all options
+«««		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
+«««			«t.childText(" ")»
+«««		«ENDFOR»
 		
 		#ifdef __cplusplus
 		  }
@@ -90,6 +140,67 @@ class EmbeddedCGenerator {
 		
 		#endif
 	'''
+	
+	
+	def getMessageName(CommonTree m) { 
+		val name = m.children.get(0) as CommonTree
+		
+		name.text
+	}
+
+	
+	def getMessage(CommonTree m) { 
+		var messageValue = new StringBuilder()
+		val name = m.children.get(0) as CommonTree
+		
+		messageValue.append("/* Structure that holds a deserialized " + name.text + "-message. */\n");
+		messageValue.append("struct ");
+		
+		messageValue.append(name.text + " {\n");
+		
+		val indent = "    "
+		var i = 1;
+		while(i < m.children.size()) {
+			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
+			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
+			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+			
+			var cType = typeMap.get(type.text);
+			
+			if (cType == null)
+				cType = "struct " + type.text;
+				
+			var repValue = ""
+			if (modifier.text.equals("repeated")) {
+				repValue = "[MAX_REPEATED_LENGTH]"
+			}
+			
+			var	typeArrayValue = arrayTypes.get(type.text)
+			if (typeArrayValue == null) {
+				typeArrayValue = ""
+			}
+			
+			if (!repValue.equals("")) {
+				messageValue.append(indent + "int" + " _" + attrName.text 
+									+ "_repeated_len" + ";\n"
+				);
+			}
+			if (!typeArrayValue.equals("")) {
+				messageValue.append(indent + "int" + " _" + attrName.text + "_len" 
+									+ repValue + ";\n"
+				);
+			}
+			
+			messageValue.append(indent + cType + " _" + attrName.text 
+									+ repValue + typeArrayValue + ";\n")
+			
+			i = i + 1
+		}  
+		messageValue.append("}")
+		
+		messageValue.toString
+	}
+
 	
 	def getEnum(CommonTree e) { 
 		var enumValue = new StringBuilder()
