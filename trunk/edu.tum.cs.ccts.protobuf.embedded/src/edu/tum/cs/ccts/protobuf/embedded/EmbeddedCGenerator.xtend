@@ -86,7 +86,7 @@ class EmbeddedCGenerator {
 		 /*******************************************************************
 		 * Enumerations: «name.toFirstUpper».proto
 		 *******************************************************************/
-		 «e.getEnum»
+		 «e.getEnumHeader»
 		 
 		 
 		«ENDFOR»	
@@ -96,7 +96,7 @@ class EmbeddedCGenerator {
 		/*******************************************************************
 		 * Message: «name.toFirstUpper».proto
 		 *******************************************************************/
-		«m.getMessage»
+		«m.getMessageHeader»
 		
 		/*
 		 * Serialize a Person-message into the given buffer at offset and return
@@ -153,7 +153,7 @@ class EmbeddedCGenerator {
 	}
 
 	
-	def getMessage(CommonTree m) { 
+	def getMessageHeader(CommonTree m) { 
 		var messageValue = new StringBuilder()
 		val name = m.children.get(0) as CommonTree
 		
@@ -211,7 +211,7 @@ class EmbeddedCGenerator {
 	}
 
 	
-	def getEnum(CommonTree e) { 
+	def getEnumHeader(CommonTree e) { 
 		var enumValue = new StringBuilder()
 		enumValue.append("enum ");
 		
@@ -265,7 +265,293 @@ class EmbeddedCGenerator {
 		 * Do not edit.                                                    *
 		 *******************************************************************/
 		 
-		#include "«name».h"
+		#include "«name.toFirstUpper».h"
+		
+		int _memcmp(const void *p1, const void *p2, unsigned int size) {
+		    unsigned int i;
+		    for(i = 0; i < size; ++ i) {
+		        if(*((char*)p1 + i) > *((char*)p2 + i))
+		            return 1;
+		        if(*((char*)p1 + i) < *((char*)p2 + i))
+		            return -1;
+		    }
+		    return 0;
+		} 
+		 
+		void _memset(void *msg_ptr, char init_val, unsigned int size) {
+		    unsigned int i;
+		    for(i = 0; i < size; ++ i)
+		        *((char*)msg_ptr + i) = init_val;
+		}
+		
+		int varint_packed_size(unsigned long value) {
+		    if ((value & (0xffffffff <<  7)) == 0) return 1;
+		    if ((value & (0xffffffff << 14)) == 0) return 2;
+		    if ((value & (0xffffffff << 21)) == 0) return 3;
+		    if ((value & (0xffffffff << 28)) == 0) return 4;
+		    return 5;  
+		}
+		
+		int write_raw_byte(char value, void *_buffer, int offset) {
+		    *((char *)_buffer + offset) = value;
+		    return ++offset;
+		}
+		
+		/** Write a little-endian 32-bit integer. */
+		int write_raw_little_endian32(unsigned long value, void *_buffer, int offset) {
+		    offset = write_raw_byte((char)((value      ) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >>  8) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 16) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 24) & 0xFF), _buffer, offset);
+		    
+		    return offset;
+		}
+		
+		/** Write a little-endian 64-bit integer. */
+		int write_raw_little_endian64(unsigned long long value, void *_buffer, int offset) {
+		    offset = write_raw_byte((char)((value      ) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >>  8) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 16) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 24) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 32) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 40) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 48) & 0xFF), _buffer, offset);
+		    offset = write_raw_byte((char)((value >> 56) & 0xFF), _buffer, offset);
+		    
+		    return offset;
+		}
+		
+		int write_raw_varint32(unsigned long value, void *_buffer, int offset) {
+		    while (1) {
+		        if ((value & ~0x7F) == 0) {
+		            offset = write_raw_byte((char)value, _buffer, offset);
+		            return offset;
+		        } else {
+		            offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
+		            value = value >> 7;
+		        }
+		    }
+		    return offset;
+		}
+		
+		int write_raw_varint64(unsigned long long value, void *_buffer, int offset) {
+		    while (1) {
+		        if ((value & ~0x7FL) == 0) {
+		            offset = write_raw_byte((char)value, _buffer, offset);
+		            return offset;
+		        } else {
+		            offset = write_raw_byte((char)((value & 0x7F) | 0x80), _buffer, offset);
+		            value = value >> 7;
+		        }
+		    }
+		    return offset;
+		}
+		
+		int write_raw_bytes(char *bytes, int bytes_size, void *_buffer, int offset) {
+		    int i; 
+		    for(i = 0; i < bytes_size; ++ i) {
+		        offset = write_raw_byte((char)*(bytes + i), _buffer, offset);
+		    }
+		    
+		    return offset;   
+		}
+		
+		unsigned long encode_zig_zag32(signed long n) {
+		    /* Note:  the right-shift must be arithmetic. */
+		    return (n << 1) ^ (n >> 31);
+		}
+		
+		unsigned long long encode_zig_zag64(signed long long n) {
+		    /* Note:  the right-shift must be arithmetic. */
+		    return (n << 1) ^ (n >> 63);
+		} 
+		
+		signed long decode_zig_zag32(unsigned long n) {
+		    return (n >> 1) ^ -(n & 1);
+		}
+		
+		signed long long decode_zig_zag64(unsigned long long n) {
+		    return (n >> 1) ^ -(n & 1);
+		}
+		
+		int read_raw_byte(char *tag, void *_buffer, int offset) {
+		    *tag = *((char *) _buffer + offset);
+		    
+		    return ++offset;
+		}
+		
+		/** Read a 32-bit little-endian integer from the stream. */
+		int read_raw_little_endian32(unsigned long *tag, void *_buffer, int offset) {
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b1 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b2 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b3 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b4 = (char) *tag;
+		    
+		    *tag = (((unsigned long)b1 & 0xff)      ) |
+		           (((unsigned long)b2 & 0xff) <<  8) |
+		           (((unsigned long)b3 & 0xff) << 16) |
+		           (((unsigned long)b4 & 0xff) << 24);
+		           
+		    return offset;
+		}
+		
+		/** Read a 64-bit little-endian integer from the stream. */
+		int read_raw_little_endian64(unsigned long long *tag, void *_buffer, int offset) {
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b1 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b2 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b3 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b4 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b5 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b6 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b7 = (char) *tag;
+		    offset = read_raw_byte((char *)tag, _buffer, offset);
+		    char b8 = (char) *tag;
+		    
+		    *tag = (((unsigned long long)b1 & 0xff)      ) |
+		           (((unsigned long long)b2 & 0xff) <<  8) |
+		           (((unsigned long long)b3 & 0xff) << 16) |
+		           (((unsigned long long)b4 & 0xff) << 24) |
+		           (((unsigned long long)b5 & 0xff) << 32) |
+		           (((unsigned long long)b6 & 0xff) << 40) |
+		           (((unsigned long long)b7 & 0xff) << 48) |
+		           (((unsigned long long)b8 & 0xff) << 56);
+		           
+		    return offset;
+		}
+		
+		int read_raw_varint32(unsigned long *tag, void *_buffer, int offset) {
+		    signed char result;
+		    
+		    offset = read_raw_byte((char *)&result, _buffer, offset);
+		    if (result >= 0) {
+		        *tag = result;
+		        return offset;
+		    }
+		    *tag = result & 0x7f;
+		    offset = read_raw_byte((char *)&result, _buffer, offset);
+		    if (result >= 0) {
+		        *tag |= result << 7;
+		    } else {
+		        *tag |= (result & 0x7f) << 7;
+		        offset = read_raw_byte((char *)&result, _buffer, offset);
+		        if (result >= 0) {
+		            *tag |= result << 14;
+		        } else {
+		            *tag |= (result & 0x7f) << 14;
+		            offset = read_raw_byte((char *)&result, _buffer, offset);
+		            if (result >= 0) {
+		                *tag |= ((unsigned long)result) << 21;
+		            } else {
+		                *tag |= (((unsigned long)result) & 0x7f) << 21;
+		                offset = read_raw_byte((char *)&result, _buffer, offset);
+		                *tag |= ((unsigned long)result) << 28;
+		                if (result < 0) {
+		                    /* Discard upper 32 bits. */
+		                    int i;
+		                    for (i = 0; i < 5; ++ i) {
+		                        offset = read_raw_byte((char *)&result, _buffer, offset);
+		                        if (result >= 0) {
+		                            return offset;
+		                        }
+		                    }
+		                    /* Invalid state. */
+		                }
+		            }
+		        }
+		    }
+		    return offset;
+		}
+		
+		int read_raw_varint64(unsigned long long *tag, void *_buffer, int offset) {
+		    short shift = 0;
+		    signed char b;
+		    *tag = 0;
+		    while (shift < 64) {
+		        offset = read_raw_byte((char *)&b, _buffer, offset);
+		        *tag |= (unsigned long long)(b & 0x7F) << shift;
+		        if ((b & 0x80) == 0) {
+		            return offset;
+		        }
+		        shift += 7;
+		    }
+		    /* return error code. */
+		    return -1;
+		}
+		
+		int can_read_raw_varint32(void *_buffer, int offset, int length) {
+		    signed char c;
+		    
+		    /* Bound length to valid range [0..5]. */
+		    if (length < 0) length = 0; else
+		    if (length > 5) length = 5;
+		    
+		    while (length > 0) {
+		        offset = read_raw_byte((char *)&c, _buffer, offset);
+		        if (c >= 0) {
+		            return 1; /* Can read (1 == true). */
+		        }
+		        length--;
+		    }
+		    
+		    return 0; /* Cannot read (0 == false). */
+		}
+		
+		int can_read_raw_varint64(void *_buffer, int offset, int length) {
+		    signed char c;
+		    
+		    /* Bound length to valid range [0..5]. */
+		    if (length < 0) length = 0; else
+		    if (length > 10) length = 10;
+		    
+		    while (length > 0) {
+		        offset = read_raw_byte((char *)&c, _buffer, offset);
+		        if (c >= 0) {
+		            return 1; /* Can read (1 == true). */
+		        }
+		        length--;
+		    }
+		    
+		    return 0; /* Cannot read (0 == false). */
+		}
+		
+		int Message_can_read_delimited_from(void *_buffer, int offset, unsigned int length) {
+		    unsigned long size;
+		    int payload_offset;
+		
+		    if (length <= 0) return 0; /* Cannot read from empty or invalid message. */
+		
+		    if (!can_read_raw_varint32(_buffer, offset, length)) {
+		        return 0; /* Could not even read the preceding size as varint32. */
+		    }
+		
+		    payload_offset = read_raw_varint32(&size, _buffer, offset);
+		    length = length - (payload_offset - offset);
+		
+		    return (length >= size) ? 1 : 0;
+		}
+		
+		unsigned long Message_get_delimited_size(void *_buffer, int offset) {
+		    unsigned long size = 0;
+		    int old_offset = offset;
+		    
+		    offset = read_raw_varint32(&size, _buffer, offset);
+		    
+		    return size + offset - old_offset;
+		}
+
+
+		
 	'''
 	
 	
