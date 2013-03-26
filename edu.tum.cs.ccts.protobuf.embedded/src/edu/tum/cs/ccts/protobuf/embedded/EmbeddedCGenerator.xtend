@@ -25,6 +25,23 @@ class EmbeddedCGenerator {
   								"bytes"->"char"
   	);
   	
+  	val wireTypeMap = newHashMap(	"int32"->"0", 
+  									"int64"->"0",
+  									"sint32"->"0",
+  									"sint64"->"0",
+  									"uint32"->"0",
+                     				"uint64"->"0",
+                     				"string"->"2",
+                     				"bool"->"0",
+                     				"float"->"5",
+                     				"double"->"1",
+                        			"fixed32"->"5",
+                        			"fixed64"->"1",
+                        			"sfixed32"->"5",
+                        			"sfixed64"->"1",
+                        			"bytes"->"2"
+	);
+  	
   	val enumSet = newHashSet()
   
     val arrayTypes = newHashMap(  "string"->"[MAX_STRING_LENGTH]", 
@@ -127,21 +144,6 @@ class EmbeddedCGenerator {
 		#endif
 		
 		#endif
-«««			 
-«««		// ... some examples for accessing nodes in a CommonTree
-«««		
-«««		// ... iterate over all children (and list their respective children) 
-«««		«FOR c : tree.children as List<CommonTree>»
-«««			«c.text» «c.childText(".")»
-«««		«ENDFOR»
-«««		
-«««		// ... access child node with a certain token type (e.g. PACKAGE)
-«««		«tree.getFirstChildWithType(ProtoParser::ANNOTATION)»
-«««		
-«««		// all options
-«««		«FOR t : tree.childTrees.filter[it.type == ProtoParser::OPTION]»
-«««			«t.childText(" ")»
-«««		«ENDFOR»
 
 	'''
 	
@@ -555,6 +557,51 @@ class EmbeddedCGenerator {
 		* Enumeration: «name.toFirstUpper».proto
 		*******************************************************************/
 		«e.getEnumImplementation»
+		
+		«ENDFOR»
+		
+		«FOR m : tree.childTrees.filter[it.type == ProtoParser::MESSAGE]»
+		/*******************************************************************
+		 * Message: «name.toFirstUpper».proto
+		 *******************************************************************/
+		
+		void «m.messageName»_clear(struct «m.messageName» *_«m.messageName») {
+			_memset(_«m.messageName», 0, sizeof(struct «m.messageName»));
+		}
+		
+		void «m.messageName»_init_optional_attributes(struct «m.messageName» *_«m.messageName») {
+		}
+		
+		int «m.messageName»_is_default_message(struct «m.messageName» *_«m.messageName») {
+			// TODO: generate code
+		    return 1;
+		}
+		
+		int «m.messageName»_write(struct «m.messageName» *_«m.messageName», void *_buffer, int offset) {
+			// TODO: generate code
+		    return 1;
+		}
+		
+		int «m.getMessageName»_write_with_tag(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset, int tag) {
+			// TODO: generate code
+		    return 1;
+		}
+		
+		int «m.getMessageName»_write_delimited_to(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset) {
+			// TODO: generate code
+		    return 1;
+		}
+		
+		int «m.getMessageName»_read(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset, int limit) {
+			// TODO: generate code
+		    return 1;
+		}
+		
+		int «m.getMessageName»_read_delimited_from(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset) {
+			// TODO: generate code
+		    return 1;
+		}
+		
 		
 		«ENDFOR»
 		
