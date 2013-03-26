@@ -84,7 +84,7 @@ class EmbeddedCGenerator {
 		
 		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
 		 /*******************************************************************
-		 * Enumerations: «name.toFirstUpper».proto
+		 * Enumeration: «name.toFirstUpper».proto
 		 *******************************************************************/
 		 «e.getEnumHeader»
 		 
@@ -550,8 +550,27 @@ class EmbeddedCGenerator {
 		    return size + offset - old_offset;
 		}
 
-
+		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
+		/*******************************************************************
+		* Enumeration: «name.toFirstUpper».proto
+		*******************************************************************/
+		«e.getEnumImplementation»
 		
+		«ENDFOR»
+		
+	'''
+	
+	
+	def getEnumImplementation(CommonTree e) '''
+		«val name = e.children.get(0) as CommonTree»
+		int «name.text»_write_with_tag(enum «name.text» *_«name.text», void *_buffer, int offset, int tag) {
+		    /* Write tag.*/
+		    offset = write_raw_varint32((tag<<3)+0, _buffer, offset);
+		    /* Write content.*/
+		    offset = write_raw_varint32(*_«name.text», _buffer, offset);
+		    
+		    return offset;
+		}
 	'''
 	
 	
