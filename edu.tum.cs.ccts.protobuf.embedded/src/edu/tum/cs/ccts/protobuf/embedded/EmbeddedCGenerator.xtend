@@ -24,7 +24,7 @@ class EmbeddedCGenerator {
   								"string"->"char",
   								"bytes"->"char"
   	);
-  	
+  	  	
   	val wireTypeMap = newHashMap(	"int32"->"0", 
   									"int64"->"0",
   									"sint32"->"0",
@@ -108,8 +108,7 @@ class EmbeddedCGenerator {
 		 
 		«ENDFOR»	
 		
-		
-		«FOR m : tree.childTrees.filter[it.type == ProtoParser::MESSAGE]»
+		«FOR m : tree.sortedChildTreesWithType(ProtoParser::MESSAGE)»
 		/*******************************************************************
 		 * Message: «name.toFirstUpper».proto
 		 *******************************************************************/
@@ -570,11 +569,11 @@ class EmbeddedCGenerator {
 		}
 		
 		void «m.messageName»_init_optional_attributes(struct «m.messageName» *_«m.messageName») {
+			«m.initOptionalAttributes»
 		}
 		
 		int «m.messageName»_is_default_message(struct «m.messageName» *_«m.messageName») {
-			// TODO: generate code
-		    return 1;
+		    return «m.isDefaultMessage»
 		}
 		
 		int «m.messageName»_write(struct «m.messageName» *_«m.messageName», void *_buffer, int offset) {
@@ -608,6 +607,109 @@ class EmbeddedCGenerator {
 	'''
 	
 	
+	def isDefaultMessage(CommonTree m) { 
+		val conditions = new StringBuilder();
+		
+		var i = 1;
+		while(i < m.children.size()) {
+			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
+			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
+			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+			
+			var cType = typeMap.get(type.text);
+			var condition = ""
+		
+			if (cType == null) {
+				if (enumSet.contains(type.text)) {
+					// Enum.
+					condition = "_" + m.messageName + "->_" + attrName.text + " == 0"
+				} else {
+					// Struct.
+					condition = type.text + "_is_default_message(&_" + m.messageName + "->_" + attrName.text +  ")"	
+				}
+			} else {
+				// Normal data types.
+				if ( cType.equals("signed long") || cType.equals("signed long long") 
+						|| cType.equals("unsigned long") || cType.equals("unsigned long long")
+						|| 	cType.equals("char") ) {
+					condition = "_" + m.messageName + "->_" + attrName.text + " == 0"			
+				}
+				
+				if ( cType.equals("float") ) {
+					condition = "_" + m.messageName + "->_" + attrName.text + " == 0.0f"
+				}
+				if ( cType.equals("double") ) {
+					condition = "_" + m.messageName + "->_" + attrName.text + " == 0.0"
+				}
+			}
+			
+			if (i < m.children.size() - 1) {
+				condition = condition + "\n && "
+			} else {
+				condition = condition + ";"
+			}
+			
+			if (!modifier.text.equals("repeated"))	
+				conditions.append(condition);
+				
+			i = i + 1
+		}  
+		
+		conditions.toString();
+	}
+	
+	
+	def initOptionalAttributes(CommonTree m) {
+		val assignments = new StringBuilder();
+		
+		var i = 1;
+		while(i < m.children.size()) {
+			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
+			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
+			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+			
+			if (modifier.text.equals("optional")) {
+				var cType = typeMap.get(type.text)
+				var isArrayType = arrayTypes.containsKey(type.text)
+				var assignment = ""
+			
+				if (cType == null) {
+					if (enumSet.contains(type.text)) {
+						// Enum.
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0;"
+					} else {
+						// Struct.
+						assignment = type.text + "_init_optional_attributes(&_" + m.messageName + "->_" + attrName.text +  ");"	
+					}
+				} else {
+					// Normal data types.
+					if ( cType.equals("signed long") || cType.equals("signed long long") 
+							|| cType.equals("unsigned long") || cType.equals("unsigned long long")
+							|| 	cType.equals("char") ) {
+						if (isArrayType)
+							assignment = "_" + m.messageName + "->_" + attrName.text + "_len" + " = 0;"
+						else			
+							assignment = "_" + m.messageName + "->_" + attrName.text + " = 0;"
+					}
+					
+					if ( cType.equals("float") ) {
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0.0f;"
+					}
+					if ( cType.equals("double") ) {
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0.0;"
+					}
+				
+				}
+				
+				assignments.append(assignment + "\n\n");
+			}	
+			i = i + 1
+		}  
+		
+		assignments.toString();
+	}
+
+
 	def getEnumImplementation(CommonTree e) '''
 		«val name = e.children.get(0) as CommonTree»
 		int «name.text»_write_with_tag(enum «name.text» *_«name.text», void *_buffer, int offset, int tag) {
