@@ -581,13 +581,11 @@ class EmbeddedCGenerator {
 		}
 		
 		int «m.getMessageName»_write_with_tag(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset, int tag) {
-			// TODO: generate code
-		    return 1;
+			«m.writeWithTag»
 		}
 		
 		int «m.getMessageName»_write_delimited_to(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset) {
-			// TODO: generate code
-		    return 1;
+			«m.writeDelimitedTo»
 		}
 		
 		int «m.getMessageName»_read(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset, int limit) {
@@ -604,6 +602,44 @@ class EmbeddedCGenerator {
 		«ENDFOR»
 		
 	'''
+	
+	
+	def writeDelimitedTo(CommonTree m) { 
+		val assignment = new StringBuilder;
+		
+		val curMessage = m.getChild(0) as CommonTree
+				
+		assignment.append('''
+		int i, shift, new_offset, size;
+		
+		new_offset = «curMessage.text»_write(_«curMessage.text», _buffer, offset);
+		size = new_offset - offset;
+		shift = (size > 127) ? 2 : 1;
+		for (i = new_offset - 1; i >= offset; -- i)
+		    *((char *)_buffer + i + shift) = *((char *)_buffer + i);
+		
+		write_raw_varint32((unsigned long) size, _buffer, offset);         
+		    
+		return new_offset + shift;
+		''')
+	}
+	
+	
+	def writeWithTag(CommonTree m) { 
+		val assignment = new StringBuilder;
+		
+		val curMessage = m.getChild(0) as CommonTree
+				
+		assignment.append('''
+		/* Write tag.*/
+		offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
+		/* Write content.*/
+		offset = «curMessage.text»_write_delimited_to(_«curMessage.text», _buffer, offset);
+		
+		return offset;
+		''')
+		
+	}
 	
 	
 	def writeMessage(CommonTree m) {
