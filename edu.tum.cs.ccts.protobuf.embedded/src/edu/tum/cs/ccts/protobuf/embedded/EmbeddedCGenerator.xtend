@@ -577,8 +577,7 @@ class EmbeddedCGenerator {
 		}
 		
 		int «m.messageName»_write(struct «m.messageName» *_«m.messageName», void *_buffer, int offset) {
-			// TODO: generate code
-		    return 1;
+			«m.writeMessage»
 		}
 		
 		int «m.getMessageName»_write_with_tag(struct «m.getMessageName» *_«m.getMessageName», void *_buffer, int offset, int tag) {
@@ -607,8 +606,121 @@ class EmbeddedCGenerator {
 	'''
 	
 	
+	def writeMessage(CommonTree m) {
+		val assignment = new StringBuilder;
+		
+		assignment.append('''
+		/* Write content of each message element.*/
+		''')
+		
+		val curMessage = m.getChild(0) as CommonTree
+		for (CommonTree attr : m.childTrees.tail) {
+			val modifier = (attr as CommonTree).children.get(0) as CommonTree
+			val type = (attr as CommonTree).children.get(1) as CommonTree
+			val attrName = (attr as CommonTree).children.get(2) as CommonTree
+			val tag = (attr as CommonTree).children.get(3) as CommonTree
+						
+			if (modifier.text.equals("repeated")) {
+				assignment.append('''
+				int «attrName.text»_cnt;
+				for («attrName.text»_cnt = 0; «attrName.text»_cnt < _«curMessage.text»->_«attrName.text»_repeated_len; ++ «attrName.text»_cnt) {
+				    «IF !enumSet.contains(type.text)»
+				    «type.writeTag(tag)»
+				    «ENDIF»
+				    «attr.writeTypeNoTag(curMessage, "["+attrName.text+"_cnt]")»
+				}
+				
+				''')
+				
+			} else if (modifier.text.equals("optional")) {
+				assignment.append('''
+				/* Write the optional attribute only if it is different than the default value. */
+				«IF typeMap.containsKey(type.text) || enumSet.contains(type.text)»
+				if(_«curMessage.text»->_«attrName.text» != 0) {
+				«ELSE»
+				if(!«type.text»_is_default_message(&_«curMessage.text»->_«attrName»)) {
+				«ENDIF»
+				    «IF !enumSet.contains(type.text) && typeMap.containsKey(type.text)»
+					«type.writeTag(tag)»
+					«ENDIF»
+				    «attr.writeTypeNoTag(curMessage, "")»
+				}
+				
+				''')
+			} else {
+				assignment.append('''
+				«IF !enumSet.contains(type.text) && typeMap.containsKey(type.text)»
+				«type.writeTag(tag)»
+				«ENDIF»
+				«attr.writeTypeNoTag(curMessage, "")»
+				
+				''')
+			}
+			
+		}
+		
+		assignment.append("return offset;\n");
+	}
+	
+	def writeTypeNoTag(CommonTree attr, CommonTree curMessage, String arrayPart) {
+		val type = (attr as CommonTree).children.get(1) as CommonTree
+		val attrName = (attr as CommonTree).children.get(2) as CommonTree
+		val tag = (attr as CommonTree).children.get(3) as CommonTree
+		 
+		if (type.text.equals("int32")) {
+			'''
+			if (_«curMessage.text»->_«attrName.text + arrayPart» >= 0)
+			    offset = write_raw_varint32(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);
+			else
+			    offset = write_raw_varint64(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);	    
+			'''
+		} else if (type.text.equals("int64") || type.text.equals("uint64")) {
+			'''offset = write_raw_varint64(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);'''
+		} else if (type.text.equals("sint32")) {
+			'''offset = write_raw_varint32(encode_zig_zag32(_«curMessage.text»->_«attrName.text + arrayPart»), _buffer, offset);'''
+		} else if (type.text.equals("sint64")) {
+			'''offset = write_raw_varint32(encode_zig_zag64(_«curMessage.text»->_«attrName.text + arrayPart»), _buffer, offset);'''
+		} else if (type.text.equals("uint32")) {
+			'''offset = write_raw_varint32(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);'''
+		} else if (type.text.equals("fixed32") || type.text.equals("sfixed32")) {
+			'''offset = write_raw_little_endian32(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);'''
+		} else if (type.text.equals("fixed64") || type.text.equals("sfixed64")) {
+			'''offset = write_raw_little_endian64(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);'''
+		} else if (type.text.equals("bytes") || type.text.equals("string")) {
+			'''
+			offset = write_raw_varint32(_«curMessage.text»->_«attrName.text»_len«arrayPart», _buffer, offset);
+			offset = write_raw_bytes(_«curMessage.text»->_«attrName.text + arrayPart», _«curMessage.text»->_«attrName.text»_len«arrayPart», _buffer, offset);
+			'''
+		} else if (type.text.equals("bool")) {
+			'''offset = write_raw_byte(_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset);'''
+		} else if (type.text.equals("float")) {
+			'''
+			unsigned long *«attrName.text»_ptr = (unsigned long *)&_«curMessage.text»->_«attrName.text + arrayPart»;
+			offset = write_raw_little_endian32(*«attrName.text»_ptr, _buffer, offset);
+			'''
+		} else if (type.text.equals("double")) {
+			'''
+			unsigned long long*«attrName.text»_ptr = (unsigned long long*)&_«curMessage.text»->_«attrName.text + arrayPart»;
+			offset = write_raw_little_endian64(*«attrName.text»_ptr, _buffer, offset);
+			'''
+		} else if (enumSet.contains(type.text) || !typeMap.containsKey(type.text)) {
+			'''offset = «type.text»_write_with_tag(&_«curMessage.text»->_«attrName.text + arrayPart», _buffer, offset, «tag.text»);'''
+		}
+		
+	}
+	
+	
+	def writeTag(CommonTree type, CommonTree tag) { 
+		if (wireTypeMap.containsKey(type.text)) {
+			'''
+			offset = write_raw_varint32((«tag.text»<<3)+«wireTypeMap.get(type.text)», _buffer, offset);
+			'''
+		}
+	}
+
+	
 	def isDefaultMessage(CommonTree m) { 
-		val conditions = new StringBuilder();
+		val conditions = new StringBuilder
 		
 		var i = 1;
 		while(i < m.children.size()) {
