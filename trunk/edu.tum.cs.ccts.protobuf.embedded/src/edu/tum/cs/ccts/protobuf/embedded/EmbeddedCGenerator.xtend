@@ -606,10 +606,19 @@ class EmbeddedCGenerator {
 		}
 		
 		int «m.getMessageName»_read_delimited_from(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset) {
-			// TODO: generate code
-		    return 1;
+			«m.readDelimitedFrom»
 		}
 		«ENDFOR»	
+	'''
+	
+	
+	def readDelimitedFrom(CommonTree m) '''
+	unsigned long size;
+	
+	offset = read_raw_varint32(&size, _buffer, offset);
+	«m.getChild(0).text»_read(_buffer, _«m.getChild(0).text», offset, size + offset);
+	
+	return offset + size;
 	'''
 	
 	
