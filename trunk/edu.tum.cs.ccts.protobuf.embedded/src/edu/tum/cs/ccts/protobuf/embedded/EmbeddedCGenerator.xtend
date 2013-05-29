@@ -47,6 +47,19 @@ class EmbeddedCGenerator {
     val arrayTypes = newHashMap(  "string"->"[MAX_STRING_LENGTH]", 
     							  "bytes"->"[MAX_BYTES_LENGTH]"
     ); 
+    
+    val readValues = newHashMap(  "int32"->"(signed long)tag", 
+    							  "int64"->"(signed long long)value", 
+    							  "sint32"->"decode_zig_zag32(tag)",
+    							  "sint64"->"decode_zig_zag64(value)",
+    							  "uint32"->"tag", 
+    							  "uint64"->"value", 
+    							  "fixed32"->"tag", 
+    							  "fixed64"->"value", 
+    							  "sfixed32"->"(signed long)tag", 
+    							  "sfixed64"->"(signed long long)value",
+    							  "bool"->"tag & 1"
+    ); 
 	
 	def doGenerate(File outputDirectory, String name, CommonTree tree) {
 		generateFile(new File(outputDirectory, name + ".h"), tree.compileHeader(name))
@@ -589,19 +602,121 @@ class EmbeddedCGenerator {
 		}
 		
 		int «m.getMessageName»_read(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset, int limit) {
-			// TODO: generate code
-		    return 1;
+			«m.readMessage»
 		}
 		
 		int «m.getMessageName»_read_delimited_from(void *_buffer, struct «m.getMessageName» *_«m.getMessageName», int offset) {
 			// TODO: generate code
 		    return 1;
 		}
-		
-		
-		«ENDFOR»
-		
+		«ENDFOR»	
 	'''
+	
+	
+	def readMessage(CommonTree m) { 
+		val assignment = new StringBuilder;
+		
+		val curMessage = m.getChild(0) as CommonTree
+				
+		assignment.append('''
+			unsigned int i = 0;
+			unsigned long long value = i;
+			unsigned long tag = value;
+			
+			/* Reset all attributes to 0 in advance. */
+			«curMessage.text»_clear(_«curMessage.text»);
+			/* Assign the optional attributes. */
+			«curMessage.text»_init_optional_attributes(_«curMessage.text»);
+			
+			/* Read/interpret all attributes from buffer offset until upper limit is reached. */
+			while(offset < limit) {
+			    offset = read_raw_varint32(&tag, _buffer, offset);
+				tag = tag>>3;
+			    switch(tag){
+			        «FOR attr : m.childTrees.tail»
+			        	«attr.caseElementTag(curMessage)»
+			        «ENDFOR»
+			    }
+			}
+			
+			return offset;
+			''')
+	}
+	
+	
+	def caseElementTag(CommonTree attr, CommonTree parent) { 
+		val tag = (attr as CommonTree).children.get(3) as CommonTree
+		val attrName = (attr as CommonTree).children.get(2) as CommonTree
+		val type = (attr as CommonTree).children.get(1) as CommonTree
+		val modifier = (attr as CommonTree).children.get(0) as CommonTree
+		
+		'''
+		/* tag of: _«parent.text»._«attrName.text» */
+		case «tag» :
+			«IF type.text.equals("int32") || type.text.equals("sint32")
+					|| type.text.equals("uint32") || type.text.equals("bool")
+					|| enumSet.contains(type.text)»
+			offset = read_raw_varint32(&tag, _buffer, offset);
+			«ELSEIF type.text.equals("string") || type.text.equals("bytes")»
+			/* Re-use 'tag' to store string length. */
+			offset = read_raw_varint32(&tag, _buffer, offset);
+			«ELSEIF type.text.equals("int64") || type.text.equals("uint64")
+					 || type.text.equals("sint64")»
+			offset = read_raw_varint64(&value, _buffer, offset);
+			«ELSEIF type.text.equals("fixed32") || type.text.equals("sfixed32")»
+			offset = read_raw_little_endian32(&tag, _buffer, offset);
+			«ELSEIF type.text.equals("fixed64") || type.text.equals("sfixed64")»
+			offset = read_raw_little_endian64(&value, _buffer, offset);
+			«ELSEIF type.text.equals("float")»
+			offset = read_raw_little_endian32(&tag, _buffer, offset);
+			float *«attrName.text» = (float *)(&tag);
+			«ELSEIF type.text.equals("double")»
+			offset = read_raw_little_endian64(&value, _buffer, offset);
+			double *«attrName.text» = (double *)(&value);
+			«ENDIF»
+			«IF readValues.containsKey(type.text)»
+			«IF modifier.text.equals("repeated")»
+			_«parent.text»->_«attrName.text»[(int)_«parent.text»->_«attrName.text»_repeated_len++] = «readValues.get(type.text)»;
+			«ELSE»
+			_«parent.text»->_«attrName.text» = «readValues.get(type.text)»;
+			«ENDIF»
+			«ELSEIF type.text.equals("string") || type.text.equals("bytes")»
+			«IF modifier.text.equals("repeated")»
+				/* Set length of current string. */
+			_«parent.text»->_«attrName.text»_len[(int)_«parent.text»->_«attrName.text»_repeated_len] = tag;
+			/* Copy raw bytes of current string. */
+			for(i = 0; i < tag; ++ i) {
+			    offset = read_raw_byte(&_«parent.text»->_«attrName.text»[(int)_«parent.text»->_«attrName.text»_repeated_len][i], _buffer, offset);
+			}
+			/* Advance to next string. */
+			_«parent.text»->_«attrName.text»_repeated_len++; 
+			«ELSE»
+			_«parent.text»->_«attrName.text»_len = tag;
+			for(i = 0; i < tag; ++ i) 
+			    offset = read_raw_byte((_«parent.text»->_«attrName.text» + i), _buffer, offset);
+			«ENDIF»
+			«ELSEIF type.text.equals("float") || type.text.equals("double")»
+			«IF modifier.text.equals("repeated")»
+			_«parent.text»->_«attrName.text»[(int)_«parent.text»->_«attrName.text»_repeated_len++] = *«attrName.text»;
+			«ELSE»
+			_«parent.text»->_«attrName.text» = *«attrName.text»;
+			«ENDIF»
+			«ELSEIF enumSet.contains(type.text)»
+			«IF modifier.text.equals("repeated")»
+			_«parent.text»->_«attrName.text»[(int)_«parent.text»->_«attrName.text»_repeated_len++] = tag;
+			«ELSE»
+			_«parent.text»->_«attrName.text» = tag;
+			«ENDIF»
+			«ELSE»
+			«IF modifier.text.equals("repeated")»
+			offset = «type.text»_read_delimited_from(_buffer, &_«parent.text»->_«attrName.text»[(int)_«parent.text»->_«attrName.text»_repeated_len++], offset);
+			«ELSE»
+			offset = «type.text»_read_delimited_from(_buffer, &_«parent.text»->_«attrName.text», offset);
+			«ENDIF»
+			«ENDIF»
+			break;
+		'''
+	}
 	
 	
 	def writeDelimitedTo(CommonTree m) { 
