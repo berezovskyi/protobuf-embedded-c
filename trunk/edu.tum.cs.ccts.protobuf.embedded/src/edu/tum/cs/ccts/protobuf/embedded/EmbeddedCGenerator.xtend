@@ -796,7 +796,7 @@ class EmbeddedCGenerator {
 				assignment.append('''
 				/* Write the optional attribute only if it is different than the default value. */
 				«IF typeMap.containsKey(type.text) || enumSet.contains(type.text)»
-				if(_«curMessage.text»->_«attrName.text» != 0) {
+				if(_«curMessage.text»->_«attrName.text»«IF arrayTypes.containsKey(type.text)»_len«ENDIF» != 0) {
 				«ELSE»
 				if(!«type.text»_is_default_message(&_«curMessage.text»->_«attrName»)) {
 				«ENDIF»
@@ -904,7 +904,10 @@ class EmbeddedCGenerator {
 				if ( cType.equals("signed long") || cType.equals("signed long long") 
 						|| cType.equals("unsigned long") || cType.equals("unsigned long long")
 						|| 	cType.equals("char") ) {
-					condition = "_" + m.messageName + "->_" + attrName.text + " == 0"			
+					var len = ""
+					if (arrayTypes.containsKey(type.text))
+						len = "_len"
+					condition = "_" + m.messageName + "->_" + attrName.text + len + " == 0"			
 				}
 				
 				if ( cType.equals("float") ) {
