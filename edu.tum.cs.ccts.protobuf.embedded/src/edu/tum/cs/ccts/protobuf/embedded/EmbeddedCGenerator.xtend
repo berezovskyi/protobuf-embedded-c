@@ -944,9 +944,13 @@ class EmbeddedCGenerator {
 		
 		var i = 1;
 		while(i < m.children.size()) {
-			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
-			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
-			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+			val attr = (m.children.get(i) as CommonTree);
+			val modifier = attr.children.get(0) as CommonTree
+			val type = attr.children.get(1) as CommonTree
+			val attrName = attr.children.get(2) as CommonTree
+			var defaultValue = "0"
+			if (attr.childCount >= 5) 
+				defaultValue = (attr.children.get(4) as CommonTree).text
 			
 			var cType = typeMap.get(type.text);
 			var condition = ""
@@ -954,7 +958,9 @@ class EmbeddedCGenerator {
 			if (cType == null) {
 				if (enumSet.contains(type.text)) {
 					// Enum.
-					condition = "_" + m.messageName + "->_" + attrName.text + " == 0"
+					if (!defaultValue.equals("0"))
+						defaultValue = "_" + defaultValue
+					condition = "_" + m.messageName + "->_" + attrName.text + " == " + defaultValue
 				} else {
 					// Struct.
 					condition = type.text + "_is_default_message(&_" + m.messageName + "->_" + attrName.text +  ")"	
@@ -967,13 +973,17 @@ class EmbeddedCGenerator {
 					var len = ""
 					if (arrayTypes.containsKey(type.text))
 						len = "_len"
-					condition = "_" + m.messageName + "->_" + attrName.text + len + " == 0"			
+					condition = "_" + m.messageName + "->_" + attrName.text + len + " == " + defaultValue			
 				}
 				
 				if ( cType.equals("float") ) {
+					if (defaultValue.equals("0"))
+						defaultValue = "0.0f"
 					condition = "_" + m.messageName + "->_" + attrName.text + " == 0.0f"
 				}
 				if ( cType.equals("double") ) {
+					if (defaultValue.equals("0"))
+						defaultValue = "0.0"
 					condition = "_" + m.messageName + "->_" + attrName.text + " == 0.0"
 				}
 			}
@@ -997,11 +1007,13 @@ class EmbeddedCGenerator {
 	def initOptionalAttributes(CommonTree m) {
 		val assignments = new StringBuilder();
 		
-		var i = 1;
-		while(i < m.children.size()) {
-			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
-			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
-			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+		for (CommonTree attr : m.childTrees.tail) {
+			val modifier = attr.children.get(0) as CommonTree
+			val type = attr.children.get(1) as CommonTree
+			val attrName = attr.children.get(2) as CommonTree
+			var defaultValue = "0"
+			if (attr.childCount >= 5) 
+				defaultValue = (attr.children.get(4) as CommonTree).text
 			
 			if (modifier.text.equals("optional")) {
 				var cType = typeMap.get(type.text)
@@ -1011,7 +1023,9 @@ class EmbeddedCGenerator {
 				if (cType == null) {
 					if (enumSet.contains(type.text)) {
 						// Enum.
-						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0;"
+						if (!defaultValue.equals("0"))
+							defaultValue = "_" + defaultValue
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = " + defaultValue + ";"
 					} else {
 						// Struct.
 						assignment = type.text + "_init_optional_attributes(&_" + m.messageName + "->_" + attrName.text +  ");"	
@@ -1022,23 +1036,26 @@ class EmbeddedCGenerator {
 							|| cType.equals("unsigned long") || cType.equals("unsigned long long")
 							|| 	cType.equals("char") ) {
 						if (isArrayType)
-							assignment = "_" + m.messageName + "->_" + attrName.text + "_len" + " = 0;"
+							assignment = "_" + m.messageName + "->_" + attrName.text + "_len" + " = " + defaultValue + ";"
 						else			
-							assignment = "_" + m.messageName + "->_" + attrName.text + " = 0;"
+							assignment = "_" + m.messageName + "->_" + attrName.text + " = " + defaultValue + ";"
 					}
 					
 					if ( cType.equals("float") ) {
-						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0.0f;"
+						if (defaultValue.equals("0"))
+							defaultValue = "0.0f"
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = " + defaultValue + ";"
 					}
 					if ( cType.equals("double") ) {
-						assignment = "_" + m.messageName + "->_" + attrName.text + " = 0.0;"
+						if (defaultValue.equals("0"))
+							defaultValue = "0.0"
+						assignment = "_" + m.messageName + "->_" + attrName.text + " = " + defaultValue + ";"
 					}
 				
 				}
 				
 				assignments.append(assignment + "\n\n");
 			}	
-			i = i + 1
 		}  
 		
 		assignments.toString();
