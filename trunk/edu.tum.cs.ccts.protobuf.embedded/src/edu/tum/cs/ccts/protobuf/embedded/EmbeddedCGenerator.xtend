@@ -2,6 +2,7 @@ package edu.tum.cs.ccts.protobuf.embedded
 
 import java.io.File
 import java.io.FileWriter
+import static extension java.lang.Integer.*
 import org.antlr.runtime.tree.CommonTree
 
 import static extension edu.tum.cs.ccts.protobuf.embedded.TreeUtils.*
@@ -23,7 +24,7 @@ class EmbeddedCGenerator {
   								"bool"->"char",
   								"string"->"char",
   								"bytes"->"char"
-  	);
+  	)
   	  	
   	val wireTypeMap = newHashMap(	"int32"->"0", 
   									"int64"->"0",
@@ -40,13 +41,13 @@ class EmbeddedCGenerator {
                         			"sfixed32"->"5",
                         			"sfixed64"->"1",
                         			"bytes"->"2"
-	);
+	)
   	
   	val enumSet = newHashSet()
   
     val arrayTypes = newHashMap(  "string"->"[MAX_STRING_LENGTH]", 
     							  "bytes"->"[MAX_BYTES_LENGTH]"
-    ); 
+    )
     
     val readValues = newHashMap(  "int32"->"(signed long)tag", 
     							  "int64"->"(signed long long)value", 
@@ -59,7 +60,9 @@ class EmbeddedCGenerator {
     							  "sfixed32"->"(signed long)tag", 
     							  "sfixed64"->"(signed long long)value",
     							  "bool"->"tag & 1"
-    ); 
+    )
+    
+  	val annotationMap = newHashMap()
 	
 	def doGenerate(File outputDirectory, String name, CommonTree tree) {
 		generateFile(new File(outputDirectory, name + ".h"), tree.compileHeader(name))
@@ -114,8 +117,8 @@ class EmbeddedCGenerator {
 		
 		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
 		 /*******************************************************************
-		 * Enumeration: «name.toFirstUpper».proto, line «e.line»
-		 *******************************************************************/
+		  * Enumeration: «name.toFirstUpper».proto, line «e.line»
+		  *******************************************************************/
 		 «e.getEnumHeader»
 		 
 		 
@@ -125,6 +128,10 @@ class EmbeddedCGenerator {
 		/*******************************************************************
 		 * Message: «name.toFirstUpper».proto, line «m.line»
 		 *******************************************************************/
+		
+		/* Maximum size of a serialized «m.getChild(0).text»-message, useful for buffer allocation. */
+		#define MAX_«m.getChild(0).text»_SIZE «m.getMaximumSerializedSize»
+		
 		«m.getMessageHeader»
 		
 		/*
@@ -160,6 +167,59 @@ class EmbeddedCGenerator {
 	'''
 	
 	
+	def getMaximumSerializedSize(CommonTree m) { 
+		var int messageSize = 2
+		for (CommonTree attr : m.childTrees.tail) {
+			val type = attr.children.get(1) as CommonTree
+			val modifier = attr.children.get(0) as CommonTree
+			var Integer repeatedLength = null;
+			if (modifier.text.equals("repeated")) {
+				repeatedLength = (annotationMap.get("MAX_REPEATED_LENGTH") as String).parseInt
+			 	if (repeatedLength == null) repeatedLength = 32;
+			 } else {
+			 	repeatedLength = 1;
+			 }
+	     
+	     	if (type.text.equals("int32") || type.text.equals("int64")
+	     			 || type.text.equals("sint64") || type.text.equals("uint64")) {
+	    		messageSize = messageSize + repeatedLength * (2 + 10)
+	        } else if (type.text.equals("sint32") || type.text.equals("uint32")) {
+        		messageSize = messageSize + repeatedLength * (2 + 5)
+      		} else if (type.text.equals("string")) {
+	    		var Integer stringLength = (annotationMap.get("MAX_STRING_LENGTH") as String).parseInt
+	       		if (stringLength == null) stringLength = 32;
+	       		messageSize = messageSize + repeatedLength * (2 + 1 + stringLength)
+	     	} else if (type.text.equals("float") || type.text.equals("fixed32") 
+	     				 || type.text.equals("sfixed32")) {
+	      		messageSize = messageSize + repeatedLength * (2 + 4)
+	    	} else if (type.text.equals("fixed64") || type.text.equals("sfixed64")
+	    				 || type.text.equals("double")) {
+		        messageSize = messageSize + repeatedLength * (2 + 8)
+	     	} else if (type.text.equals("bool") || enumSet.contains(type.text)) {
+         		messageSize = messageSize + repeatedLength * (2 + 1)
+	     	} else if (type.text.equals("bytes")) {
+	       		var Integer bytesLength = (annotationMap.get("MAX_BYTES_LENGTH") as String).parseInt
+         		if (bytesLength == null) bytesLength = 32;
+         		messageSize = messageSize + repeatedLength * (2 + 1 + bytesLength)
+       		} else {
+	         	//embedded messages
+	         	messageSize = messageSize + repeatedLength * type.text.findMessage(m.parent).getMaximumSerializedSize
+       		}
+		}
+		
+		messageSize
+	}
+	
+	def CommonTree findMessage(String messageName, CommonTree tree) { 
+		for (CommonTree m : tree.childTrees.filter[it.type == ProtoParser::MESSAGE]) {
+			if (m.getChild(0).text.equals(messageName))
+				return m
+		}
+		// Error state
+		null
+	}
+	
+	
 	def getMessageName(CommonTree m) { 
 		val name = m.children.get(0) as CommonTree
 		
@@ -178,9 +238,9 @@ class EmbeddedCGenerator {
 		
 		val indent = "    "
 		for(CommonTree attr : m.childTrees.tail) {
-			val modifier = (attr as CommonTree).children.get(0) as CommonTree
-			val type = (attr as CommonTree).children.get(1) as CommonTree
-			val attrName = (attr as CommonTree).children.get(2) as CommonTree
+			val modifier = attr.children.get(0) as CommonTree
+			val type = attr.children.get(1) as CommonTree
+			val attrName = attr.children.get(2) as CommonTree
 			
 			var cType = typeMap.get(type.text);
 			
@@ -258,6 +318,8 @@ class EmbeddedCGenerator {
 		val number = d.children.get(1) as CommonTree
 		define = define + literal.text.toUpperCase + " "
 		define = define + number.text
+
+		annotationMap.put(literal.text.toUpperCase, number.text)
 	}
 
 
@@ -651,10 +713,10 @@ class EmbeddedCGenerator {
 	
 	
 	def caseElementTag(CommonTree attr, CommonTree parent) { 
-		val tag = (attr as CommonTree).children.get(3) as CommonTree
-		val attrName = (attr as CommonTree).children.get(2) as CommonTree
-		val type = (attr as CommonTree).children.get(1) as CommonTree
-		val modifier = (attr as CommonTree).children.get(0) as CommonTree
+		val tag = attr.children.get(3) as CommonTree
+		val attrName = attr.children.get(2) as CommonTree
+		val type = attr.children.get(1) as CommonTree
+		val modifier = attr.children.get(0) as CommonTree
 		
 		'''
 		/* tag of: _«parent.text»._«attrName.text» */
@@ -772,10 +834,10 @@ class EmbeddedCGenerator {
 		
 		val curMessage = m.getChild(0) as CommonTree
 		for (CommonTree attr : m.childTrees.tail) {
-			val modifier = (attr as CommonTree).children.get(0) as CommonTree
-			val type = (attr as CommonTree).children.get(1) as CommonTree
-			val attrName = (attr as CommonTree).children.get(2) as CommonTree
-			val tag = (attr as CommonTree).children.get(3) as CommonTree
+			val modifier = attr.children.get(0) as CommonTree
+			val type = attr.children.get(1) as CommonTree
+			val attrName = attr.children.get(2) as CommonTree
+			val tag = attr.children.get(3) as CommonTree
 						
 			if (modifier.text.equals("repeated")) {
 				assignment.append('''
@@ -820,9 +882,9 @@ class EmbeddedCGenerator {
 	}
 	
 	def writeTypeNoTag(CommonTree attr, CommonTree curMessage, String arrayPart) {
-		val type = (attr as CommonTree).children.get(1) as CommonTree
-		val attrName = (attr as CommonTree).children.get(2) as CommonTree
-		val tag = (attr as CommonTree).children.get(3) as CommonTree
+		val type = attr.children.get(1) as CommonTree
+		val attrName = attr.children.get(2) as CommonTree
+		val tag = attr.children.get(3) as CommonTree
 		 
 		if (type.text.equals("int32")) {
 			'''
