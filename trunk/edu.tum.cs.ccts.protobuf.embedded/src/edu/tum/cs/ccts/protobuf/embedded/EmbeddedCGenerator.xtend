@@ -839,6 +839,18 @@ class EmbeddedCGenerator {
 			val type = attr.children.get(1) as CommonTree
 			val attrName = attr.children.get(2) as CommonTree
 			val tag = attr.children.get(3) as CommonTree
+			var defaultValue = "0"
+			if (attr.childCount >= 5) {
+				defaultValue = (attr.children.get(4) as CommonTree).text
+				if (defaultValue.toLowerCase.equals("true")) 
+					defaultValue = "1"
+				if (defaultValue.toLowerCase.equals("false"))
+					defaultValue = "0"
+				if (enumSet.contains(type.text))
+					defaultValue = "_" + defaultValue
+			} else if (arrayTypes.containsKey(type)) {
+				defaultValue = ""
+			}
 						
 			if (modifier.text.equals("repeated")) {
 				assignment.append('''
@@ -853,14 +865,27 @@ class EmbeddedCGenerator {
 				''')
 				
 			} else if (modifier.text.equals("optional")) {
+				var arrayConditions = ""
+				if (arrayTypes.containsKey(type.text)) {
+					var i = 0
+					while (i < defaultValue.length) {
+						arrayConditions = arrayConditions + "\n    || _" + curMessage.text + "->_" +
+							attrName.text + "[" + i + "]" + " != " + "'" + defaultValue.charAt(i) + "'"
+						i = i + 1
+					}
+				}
 				assignment.append('''
 				/* Write the optional attribute only if it is different than the default value. */
 				«IF typeMap.containsKey(type.text) || enumSet.contains(type.text)»
-				if(_«curMessage.text»->_«attrName.text»«IF arrayTypes.containsKey(type.text)»_len«ENDIF» != 0) {
+				«IF arrayTypes.containsKey(type.text)»
+				if(_«curMessage.text»->_«attrName.text»_len != «defaultValue.length»«arrayConditions») {
+				«ELSE»
+				if(_«curMessage.text»->_«attrName.text» != «defaultValue») {
+				«ENDIF»
 				«ELSE»
 				if(!«type.text»_is_default_message(&_«curMessage.text»->_«attrName»)) {
 				«ENDIF»
-				    «IF !enumSet.contains(type.text) && typeMap.containsKey(type.text)»
+					«IF !enumSet.contains(type.text) && typeMap.containsKey(type.text)»
 					«type.writeTag(tag)»
 					«ENDIF»
 				    «attr.writeTypeNoTag(curMessage, "")»
