@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
 
@@ -37,6 +38,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.AddressBook;
 import edu.tum.cs.ccts.protobuf.embedded.TestProtos.Person;
@@ -576,7 +578,8 @@ public class TestWireFormat {
 
 				// Test j_pack-c_unpack-c_pack-j_unpack-js cycle.
 				iniPerson = lPerson.get(step++);
-				Assert.assertEquals(iniPerson, person);
+				checkOptionalAttributes(person, iniPerson);
+				checkRequiredRepeatedAttributes(person, iniPerson);
 
 				// Test whether c program sees the same values as java.
 				if (lBuilder.size() == 1) {
@@ -645,6 +648,98 @@ public class TestWireFormat {
 
 		in.close();
 		testData.close();
+	}
+
+	private void checkRequiredRepeatedAttributes(Person person, Person iniPerson) {
+		for (Entry<FieldDescriptor, Object> e : iniPerson.getAllFields()
+				.entrySet()) {
+			if (e.getKey().isOptional()) {
+				continue;
+			}
+			boolean foundAttribute = false;
+			for (Entry<FieldDescriptor, Object> o : person.getAllFields()
+					.entrySet()) {
+				if (e.equals(o)) {
+					foundAttribute = true;
+					break;
+				}
+			}
+			Assert.assertTrue(foundAttribute);
+		}
+
+		Assert.assertEquals(person.getUnknownFields(),
+				iniPerson.getUnknownFields());
+	}
+
+	private void checkOptionalAttributes(Person person, Person iniPerson) {
+		if (iniPerson.getOptBool() != person.getOptBool()
+				&& person.hasOptBool()) {
+			Assert.assertTrue(false);
+		}
+		if (!iniPerson.getOptAb().equals(person.getOptAb())
+				&& person.hasOptAb()) {
+			Assert.assertTrue(false);
+		}
+		if (!iniPerson.getOptBytes().equals(person.getOptBytes())
+				&& person.hasOptBytes()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptDouble() != person.getOptDouble()
+				&& person.hasOptDouble()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptEnum() != person.getOptEnum()
+				&& person.hasOptEnum()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptFixed32() != person.getOptFixed32()
+				&& person.hasOptFixed32()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptFixed64() != person.getOptFixed64()
+				&& person.hasOptFixed64()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptFloat() != person.getOptFloat()
+				&& person.hasOptFloat()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptInt32() != person.getOptInt32()
+				&& person.hasOptInt32()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptInt64() != person.getOptInt64()
+				&& person.hasOptInt64()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptSFixed32() != person.getOptSFixed32()
+				&& person.hasOptSFixed32()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptSFixed64() != person.getOptSFixed64()
+				&& person.hasOptSFixed64()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptSInt32() != person.getOptSInt32()
+				&& person.hasOptSInt32()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptSInt64() != person.getOptSInt64()
+				&& person.hasOptSInt64()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptUInt32() != person.getOptUInt32()
+				&& person.hasOptUInt32()) {
+			Assert.assertTrue(false);
+		}
+		if (iniPerson.getOptUInt64() != person.getOptUInt64()
+				&& person.hasOptUInt64()) {
+			Assert.assertTrue(false);
+		}
+		if (!iniPerson.getOptString().equals(person.getOptString())
+				&& person.hasOptString()) {
+			Assert.assertTrue(false);
+		}
 	}
 
 	/**
