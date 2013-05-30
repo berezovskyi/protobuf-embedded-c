@@ -114,7 +114,7 @@ class EmbeddedCGenerator {
 		
 		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
 		 /*******************************************************************
-		 * Enumeration: «name.toFirstUpper».proto
+		 * Enumeration: «name.toFirstUpper».proto, line «e.line»
 		 *******************************************************************/
 		 «e.getEnumHeader»
 		 
@@ -123,7 +123,7 @@ class EmbeddedCGenerator {
 		
 		«FOR m : tree.sortedChildTreesWithType(ProtoParser::MESSAGE)»
 		/*******************************************************************
-		 * Message: «name.toFirstUpper».proto
+		 * Message: «name.toFirstUpper».proto, line «m.line»
 		 *******************************************************************/
 		«m.getMessageHeader»
 		
@@ -177,11 +177,10 @@ class EmbeddedCGenerator {
 		messageValue.append(name.text + " {\n");
 		
 		val indent = "    "
-		var i = 1;
-		while(i < m.children.size()) {
-			val modifier = (m.children.get(i) as CommonTree).children.get(0) as CommonTree
-			val type = (m.children.get(i) as CommonTree).children.get(1) as CommonTree
-			val attrName = (m.children.get(i) as CommonTree).children.get(2) as CommonTree
+		for(CommonTree attr : m.childTrees.tail) {
+			val modifier = (attr as CommonTree).children.get(0) as CommonTree
+			val type = (attr as CommonTree).children.get(1) as CommonTree
+			val attrName = (attr as CommonTree).children.get(2) as CommonTree
 			
 			var cType = typeMap.get(type.text);
 			
@@ -215,9 +214,7 @@ class EmbeddedCGenerator {
 			}
 			
 			messageValue.append(indent + cType + " _" + attrName.text 
-									+ repValue + typeArrayValue + ";\n")
-			
-			i = i + 1
+									+ repValue + typeArrayValue + ";\n")			
 		}  
 		messageValue.append("};")
 		
@@ -566,7 +563,7 @@ class EmbeddedCGenerator {
 
 		«FOR e : tree.childTrees.filter[it.type == ProtoParser::ENUM]»
 		/*******************************************************************
-		* Enumeration: «name.toFirstUpper».proto
+		* Enumeration: «name.toFirstUpper».proto, line «e.line»
 		*******************************************************************/
 		«e.getEnumImplementation»
 		
@@ -574,7 +571,7 @@ class EmbeddedCGenerator {
 		
 		«FOR m : tree.childTrees.filter[it.type == ProtoParser::MESSAGE]»
 		/*******************************************************************
-		 * Message: «name.toFirstUpper».proto
+		 * Message: «name.toFirstUpper».proto, line «m.line»
 		 *******************************************************************/
 		
 		void «m.messageName»_clear(struct «m.messageName» *_«m.messageName») {
