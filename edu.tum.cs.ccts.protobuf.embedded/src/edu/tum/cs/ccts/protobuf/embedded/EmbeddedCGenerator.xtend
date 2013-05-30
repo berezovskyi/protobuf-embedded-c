@@ -316,10 +316,11 @@ class EmbeddedCGenerator {
 		
 		val literal = d.children.get(0) as CommonTree
 		val number = d.children.get(1) as CommonTree
+		
+		annotationMap.put(literal.text.toUpperCase, number.text)
+		
 		define = define + literal.text.toUpperCase + " "
 		define = define + number.text
-
-		annotationMap.put(literal.text.toUpperCase, number.text)
 	}
 
 
