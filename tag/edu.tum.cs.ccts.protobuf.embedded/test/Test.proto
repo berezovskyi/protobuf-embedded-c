@@ -1,0 +1,95 @@
+package edu.tum.cs.ccts.protobuf.embedded;
+
+option java_package="edu.tum.cs.ccts.protobuf.embedded";
+option java_outer_classname="TestProtos";
+
+// Embedded C internal options.
+//@max_repeated_length=100
+//@max_string_length=32
+//@max_bytes_length=32
+
+enum PhoneType {
+  MOBILE = 0;
+  HOME = 1;
+  WORK = 2;
+}
+
+message PhoneNumber {
+  required float number = 1;
+  optional PhoneType type = 2 [default = MOBILE];
+}
+
+message Person {
+  required AddressBook ab = 38;
+  required string name1 = 1;
+  required string name2 = 2;
+  required string name3 = 3;
+  required string name4 = 4;
+  required string name5 = 5;
+  required string name6= 6;
+  required bytes bname = 36;
+  required int32 id = 7;
+  required int64 id64 = 16;
+  required sint32 sid = 20;
+  required sint64 sid64 = 22;
+  required uint32 uid = 24;
+  required uint64 uid64 = 26;
+  required fixed32 fid32 = 28;
+  required fixed64 fid64 = 30;
+  required sfixed32 sfid32 = 32;
+  required sfixed64 sfid64 = 34;
+  required float iq = 8;
+  required double iqd = 18;
+  required bool email = 9;
+  required PhoneType phone = 10;
+  repeated string strAttr = 11;
+  repeated bytes bAttr = 37;
+  repeated int32 intAttr = 12;
+  repeated int64 int64Attr = 17;
+  repeated sint32 sintAttr = 21;
+  repeated sint64 sintAttr64 = 23;
+  repeated uint32 uintAttr = 25;
+  repeated uint64 uintAttr64 = 27;
+  repeated fixed32 fintAttr = 29;
+  repeated fixed64 fintAttr64 = 31;
+  repeated sfixed32 sfintAttr = 33;
+  repeated sfixed64 sfintAttr64 = 35;
+  repeated bool boolAttr = 13;
+  repeated float floatAttr = 14;
+  repeated double doubleAttr = 19;
+  repeated PhoneType enumAttr = 15;
+  optional PhoneType optEnum = 39 [default = WORK];
+  optional float optFloat = 40 [default = 1.0];
+  optional double optDouble = 41 [default = 1.0];
+  optional bool optBool = 42 [default = true];
+  optional int32 optInt32 = 43 [default = 100];
+  optional int64 optInt64 = 44 [default = 1000000000000];
+  optional sint32 optSInt32 = 45 [default = 100];
+  optional sint64 optSInt64 = 46 [default = 1000000000000];
+  optional uint32 optUInt32 = 47 [default = 100];
+  optional uint64 optUInt64 = 48 [default = 1000000000000];
+  optional fixed32 optFixed32 = 49 [default = 100];
+  optional fixed64 optFixed64 = 50 [default = 1000000000000];
+  optional sfixed32 optSFixed32 = 51 [default = 100];
+  optional sfixed64 optSFixed64 = 52 [default = 1000000000000];
+  optional string optString = 53 [default = "vlad"];
+  optional bytes optBytes = 54 [default = "123"];
+  optional AddressBook optAb = 55;
+}
+
+message AddressBook {
+  required string address = 1;
+  required int32 number = 2;
+}
+
+message C {
+	required B b = 1;
+}
+
+message B {
+	required int32 i = 1;
+}
+
+message A{
+	required B b = 1;
+}
