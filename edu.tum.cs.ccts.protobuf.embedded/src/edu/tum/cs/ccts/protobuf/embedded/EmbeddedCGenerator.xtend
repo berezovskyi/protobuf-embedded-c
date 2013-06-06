@@ -1047,13 +1047,17 @@ class EmbeddedCGenerator {
 			
 			if (i < m.children.size() - 1) {
 				condition = condition + "\n && "
+				if (!modifier.text.equals("repeated"))	
+					conditions.append(condition)
 			} else {
 				condition = condition + ";"
+				if (!modifier.text.equals("repeated")) {
+					conditions.append(condition)
+				} else {
+					conditions.append("1;")
+				}
 			}
-			
-			if (!modifier.text.equals("repeated"))	
-				conditions.append(condition);
-				
+								
 			i = i + 1
 		}  
 		
