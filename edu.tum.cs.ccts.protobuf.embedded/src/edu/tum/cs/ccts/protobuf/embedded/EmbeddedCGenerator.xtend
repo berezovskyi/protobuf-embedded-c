@@ -9,6 +9,12 @@ import static extension edu.tum.cs.ccts.protobuf.embedded.TreeUtils.*
 
 class EmbeddedCGenerator {
 	
+	val STANDARD_REPEATED_LENGTH = 32
+	
+	val STANDARD_BYTES_LENGTH = 32
+	
+	val STANDARD_STRING_LENGTH = 32
+	
 	val typeMap = newHashMap(   "double"->"double",
   							    "float"->"float",
   								"int32"->"signed long",
@@ -174,7 +180,11 @@ class EmbeddedCGenerator {
 			val modifier = attr.children.get(0) as CommonTree
 			var Integer repeatedLength = null;
 			if (modifier.text.equals("repeated")) {
-				repeatedLength = (annotationMap.get("MAX_REPEATED_LENGTH") as String).parseInt
+				if (annotationMap.get("MAX_REPEATED_LENGTH") == null) {
+					repeatedLength = STANDARD_REPEATED_LENGTH;	
+				} else {
+					repeatedLength = (annotationMap.get("MAX_REPEATED_LENGTH") as String).parseInt					
+				}
 			 	if (repeatedLength == null) repeatedLength = 32;
 			 } else {
 			 	repeatedLength = 1;
@@ -186,8 +196,12 @@ class EmbeddedCGenerator {
 	        } else if (type.text.equals("sint32") || type.text.equals("uint32")) {
         		messageSize = messageSize + repeatedLength * (2 + 5)
       		} else if (type.text.equals("string")) {
-	    		var Integer stringLength = (annotationMap.get("MAX_STRING_LENGTH") as String).parseInt
-	       		if (stringLength == null) stringLength = 32;
+      			var Integer stringLength
+      			if (annotationMap.get("MAX_STRING_LENGTH") == null) {
+					stringLength = STANDARD_STRING_LENGTH;	
+				} else {
+					stringLength = (annotationMap.get("MAX_STRING_LENGTH") as String).parseInt					
+				}
 	       		messageSize = messageSize + repeatedLength * (2 + 1 + stringLength)
 	     	} else if (type.text.equals("float") || type.text.equals("fixed32") 
 	     				 || type.text.equals("sfixed32")) {
@@ -198,8 +212,12 @@ class EmbeddedCGenerator {
 	     	} else if (type.text.equals("bool") || enumSet.contains(type.text)) {
          		messageSize = messageSize + repeatedLength * (2 + 1)
 	     	} else if (type.text.equals("bytes")) {
-	       		var Integer bytesLength = (annotationMap.get("MAX_BYTES_LENGTH") as String).parseInt
-         		if (bytesLength == null) bytesLength = 32;
+	     		var Integer bytesLength
+      			if (annotationMap.get("MAX_BYTES_LENGTH") == null) {
+					bytesLength = STANDARD_BYTES_LENGTH;	
+				} else {
+					bytesLength = (annotationMap.get("MAX_BYTES_LENGTH") as String).parseInt					
+				}
          		messageSize = messageSize + repeatedLength * (2 + 1 + bytesLength)
        		} else {
 	         	//embedded messages
